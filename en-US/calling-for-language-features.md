@@ -1,10 +1,16 @@
 ﻿# Introduction
 
-This document lists features wanted but not found (in a satisfied flavor) in existing contemporary programming languages (with some discussions and external resources presented together). It is also used as a collection of descriptions about the reasons (and the reasoning) for a new **general-purposed** language. Moreover, it implies the contents in a [requirement document](https://en.wikipedia.org/wiki/Product_requirements_document) of the language.
+This document lists wanted properties of a programming language to serve different programming environments. Most properties are provided through the *features* of a language. Some other required properties are guaranteed by deliberately lacking of specific set of features (i.e. *misfeatures*).
+
+This document shows the required properties are not found (in a satisfying flavor) coexisting in contemporary programming languages. Further, it is technically difficult to modify existing language designs to accomadate the required properties. As a result, a new language design is required. This document is therefore used as a collection of descriptions about the reasons (and the reasoning) for this new **general-purposed** language. Moreover, it implies the contents in a [requirement document](https://en.wikipedia.org/wiki/Product_requirements_document) of the language.
+
+Besides the brief requirements, some detailed discussions and external resources are presented in this document for technical interests.
+
+Not all existing programming languages are equally far away from the requirements here. Some of the languages actually have quite a lot of the desired properties, albeit still not enough. Examples of such languages are also discussed in this document.
 
 ## Disclaimers on neutrality
 
-This document tries to describe objective views on the aspects being interested by arbitrary but unspecified stakeholders of the language. Most significant aspects including generality and simplicity. However, the judgment of interests otherwise can be largely subjective. It may also be authored (and authorized) with some subjective concrete points (e.g. on the set of features) occasionally. Such points are not defects iff. there is sufficient reasoning specifically.
+This document tries to describe objective views on the aspects being interested by arbitrary but unspecified stakeholders of the language. Most significant aspects including generality and simplicity. However, the judgment of interests otherwise (including the trade-offs dealing with the conflicts between generality and simplicity) can be largely subjective. It may also be authored (and authorized) with some subjective concrete points (e.g. on the set of accepted features) occasionally. Such points are not defects iff. there is sufficient reasoning specifically.
 
 That said, any biased points without sufficient reasoning are not intended, albeit the judgment of "sufficient reasoning" is also somewhat subjective.
 
@@ -36,7 +42,7 @@ Some features can be quite "large" in the sense of specification, so they are li
 
 Approved and proposed design choices are organized as the following "Outline" clause. Main highlights (pros) of a design choice as short phrases may be listed in lists, following the subclause title or the introduction paragraph.
 
-For the purpose of feasibility, concrete languages may be illustrated. They are also used as proof-of-concept resources about technical difficulties and reasonability of the design, which would not be exhaustive here.
+For the purpose of feasibility, concrete languages may be illustrated. They are also used as proof-of-concept resources about technical difficulties and reasonability of the design, which might not be exhaustive.
 
 The features are about the design of languages which can be *implementable*. This does not mean that such languages should already have actual implemenations. Nothing beyond specifications are assumed here except illustrations to prove implementation feasibility.
 
@@ -48,6 +54,7 @@ For generality, only the general-purposed properties are emphasized here, as a D
 
 * Providing a solid and reliable knowledge base to be referenced and derived
 * Maintaining a single authoritative resource with (hopefully) less cost to update features and to fix potential defects in the relevant designs
+* Giving a clear and deterministic way to evaluate the properties about implementability
 
 The language shall have a *normative* specification.
 
@@ -261,6 +268,8 @@ There exist misnomers that PTC or TCO will be harmful to diagnostics and/or avai
 
 This approach does not use "native" control stack provided by traditional [ISA (instruction set architecture)](https://en.wikipedia.org/wiki/Instruction_set_architecture). Losing direct support from hardware seems inefficient, but not much. Practical implementations can use such strategy as well. For example, [SML/NJ](https://www.smlnj.org/) uses heap-allocated stack frames.
 
+Note that this approach does not implicitly mandate a general-purpose glabal store. Whether a global store used for activation records, or the number of instances of the stores provieded by the design, are all details not concerned here. See the "avoidence of mandatory" subcluases below.
+
 ## Deterministic deallocation
 
 * Allowing programmable boundary of effects
@@ -282,19 +291,26 @@ A language lacking deterministic deallocation may require [GC (garbage collectio
 
 # Avoidance of mandatory
 
-Mandatory of some features may be problematic in general, although they can be opt-in. They are listed in following subclauses.
+Mandatory of some features may be problematic in general.
 
-In general, making some features to be *derivative* (as *derivations*) in libraries (rather than to be *primitives* specified by the core language rules) is beneficial for various reasons.
+* Some of these features are misfeatures and [considered harmful](https://en.wikipedia.org/wiki/Considered_harmful). Inclusion of them oftn has predicatable problems not worth tweaking the remaining design of the language.
+	* They may introduce unwanted assumptions and such assumptions are often unneeded restrictions. It is at least suspicious to consider them as genuine "features" for a general-purposed language.
+	* They may logically conflict with other features.
+	* They may break or undermine the guarantees provided by the remaining design.
+	* They may lead to significant difficulties on the consistency of the design, e.g. the methods to maintain the compatibility.
+* Other features may be desired without frustrations like misfeatures, but they are considered too specific.
+	* With respect to the property about being general-purposed of a language, they are the exact targets to be opt-in, rather than to be built-in.
+	* Being built-in as *primitives* specified by the core language rules may have predicatable cons, hence premature optimizations.
+		* Fixed primitives design may rely on other language features (like complex type systems) too eagerly. The dependencies are not easy to eliminate in practice, and it is particularly annoying when different pieces of the specification clash due to the premature complexity in developing a language.
+		* There are more than one styles of primitives for a specific but not precisely-defined functionality. Each has pros and cons up to the specific target domains. Fixed the design of primitives can easily undermine the general-purposed properties of the language, thus considered harmful.
+	* On the other hand, being opt-in by user programs as *derivations* (e.g. in the libraries) instead is beneficial for various practical reasons.
+		* Derivations in libraries can be tested with different designs for experience on different domains, leaving the freedom of choices to the users.
+		* Derivations are immune to the overhead and complexity (both in the language specification and use cases of userland) when they are not used.
+		* Derivations may be developed and verified separately without interfering compatibility issues among language specification updates. This enables the ability of parallelism in development of the language design.
 
-* There are more than one styles of primitives for a specific but not precisely-defined functionality. Each has pros and cons up to the specific target domains. Fixed the design of primitives can easily undermine the general-purposed properties of the language, thus [considered harmful](https://en.wikipedia.org/wiki/Considered_harmful).
-* Fixed primitives design may rely on other language features (like complex type systems) too eagerly. The dependencies are not easy to eliminate in practice, and it is particularly annoying when different pieces of the specification clash due to the premature complexity in developing a language.
-* On the other hand, derivations in libraries can be tested with different designs for experience on different domains, leaving the freedom of choices to the users.
-* Derivations are immune to the overhead and complexity (both in the language specification and use cases of userland) when they are not used.
-* Derivations may be developed and verified separately without interfering compatibility issues among language specification updates. This enables the ability of parallelism in development of the language design.
+Some features may consist of both kinds at the first look. They may or may not be decomposed into different kinds. Nevertheless, the mixture often suggests it is over-complicated to be a core language feature. In general, better avoid a feature being ruled as primitives. Otherwise, evaluate the gain vs. cost before introducing primitives to ensure such choice is indeed preferred.
 
-So better avoid a feature being ruled as primitives; otherwise, evaluate the gain vs. cost before introducing primitives to ensure such choice is indeed preferred.
-
-Some other features are considered harmful because of introducing the unwanted assumptions and such assumptions are often unneeded restrictions. It is at least suspicious to consider them as "features" for a general-purposed language.
+The features fail to fall in the category of primitives according to the method above are listed in following subclauses.
 
 ## Phases and stages
 
@@ -377,7 +393,7 @@ Control effect shall be reified, not by providing more build-in control primitiv
 
 ### Sequential control
 
-Sequential control forms, or *statements*, consist the imperative style of the control of programs. Nevertheless, it is not the fundamental one and it can be derived from primitives in existed calculi with (lambda or vau) *abstraction* constructs. The sequential semantics are essentially buried in the rules about order of applicative function calls, and there is no need to introduce a new special rule specific for this purpose.
+Sequential control forms, or *statements*, consist the imperative style of the control of programs. Nevertheless, it is not the fundamental one and it can be derived from primitives in existed calculi with (lambda or vau) *abstraction* constructs. The sequential semantics is essentially buried in the rules about order of applicative function calls (i.e. *function applications*), and there is no need to introduce a new special rule specific for this purpose.
 
 ### [Exception handling](https://en.wikipedia.org/wiki/Exception_handling)
 
@@ -406,6 +422,21 @@ The Kernel language does not rely on sequential control effects in its primitive
 
 Scheme does not have loops in primitive features. It encourages recursion (with mandatory proper tail recursion) instead. Kernel does the exact same.
 
+## Global store
+
+For the purpose of flexibility of a general-purposed language, a single global configuration of memory space (the global store) shall not be mandated. This effectively allows the implementations to provide no global allocation facilities when they are not supposed to be useful, e.g. for devices designed to run programs with fixed memory footprints. Note this does not prevent implementations to provide such interface for compatilibity. Implemantations can also provide opt-in global allocation which always fail.
+
+Moreover, it ensures the remaining design of the language does not relies on the global properties of allocation. This means it can be less problematic to adapt to implementation schemes with constraints about the memory locality, such as [distributing systems](https://en.wikipedia.org/wiki/Distributed_computing), because:
+
+* No global sharing is implied.
+* No global memory consistency is implied.
+
+The constraints in practice are often very coarse and there usually still need to have computing nodes sharing the resources in various concrete designs. Nevertheless, a genuine general-purposed top-level design shall principally avoid the embarassment of overly strong assumptions on the underlying computation model. Ultimately, fighting with [physical laws](https://en.wikipedia.org/wiki/Principle_of_locality) is also far from wise.
+
+### Examples
+
+ISO C has the notion reflecting the status of objects being allocated in the global free store as *allocated storage duration*, whose availablity is provided by specific standard library functions like `malloc`. ISO C allows conforming implementations without such library functions. Thus, the allocated storage duration is not mandated.
+
 ## [GC](https://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29)
 
 See discussions in the subclause about necessity of deterministic deallocation above. This directly disallows relying on [tracing GC](https://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29#Tracing).
@@ -414,15 +445,20 @@ GC also effectively encourages blur on object *ownership* and *access rights*, a
 
 There are other implementation concerns to avoid general-purposed GC by default.
 
-* Notably, GC often incurs memory consumption problem, that is, requiring [a lot more backing memory than the amount being needed](https://sealedabstract.com/rants/why-mobile-web-apps-are-slow/index.html).
-	* Note this is actually the instance identified by "leak" as per the definition of [[Cl98]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.8567&rep=rep1&type=pdf), being stricter worse than deterministic release of memory in block scope variables of ALGOL-like languages.
-	* This increases the risk of [page faults](https://en.wikipedia.org/wiki/Page_fault) in modern systems, which is even worse for performance.
+* Most typical GC implementations have allocators directly relying on a single global store.
+	* This already conflicts with the requirements of avoiding mandatory of the global store described in the related subclause.
+	* Consequently, deriving a language without GC in user programs is generally impossible. This conflicts with the requirements of general-purposed property (at least to the configurations which cannot afford the overhead of the global store).
+* Notably, GC often incurs memory consumption problem even with a robust global store. That is, requiring [a lot more backing memory than the amount being needed](https://sealedabstract.com/rants/why-mobile-web-apps-are-slow/index.html).
+	* Note this is actually a kind of "leak" as per the definition of [[Cl98]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.8567&rep=rep1&type=pdf), being stricter worse than deterministic release of memory in block scope variables of ALGOL-like languages.
+	* This increases the risks of [page faults](https://en.wikipedia.org/wiki/Page_fault) in modern systems, which is even worse for performance.
 * Many GC incurs the [STW (stop-the-world)](https://en.wikipedia.org/wiki/Tracing_garbage_collection#Stop-the-world_vs._incremental_vs._concurrent) problem. This can seriously degenerate responsibility of applications by poor latency and causes bad user experience in cases of interactive applications.
 	* Generational or incremental GC may relieve the problem, but not totally avoid. And the complexity of GC implementation can increase a lot.
 	* Most concurrent GC implementations have no better situations except that the stop time would be less. But the complexity can be even more.
 	* The [C4](https://www.azul.com/files/c4_paper_acm2.pdf) claims it can totally avoid the stop. However, it is only meaningfully available on a system equipped with huge amount of memory (say, several TBs in one instance).
-* These performance problems make it not suited for most real-time or low-latency applications. Although in theory GC is not necessarily inconsistent with these requirements, it is already quite hard to implement. With limited memory resources, this is even harder.
-* Some languages with need of "system programming" like C, C++ and Rust avoid GC by default. In particular, (general-purposed) GC violates [zero overhead](https://webstore.iec.ch/preview/info_isoiec18015{ed1.0}en.pdf) principle in C++, and similarly, [zero overhead abstraction](https://blog.rust-lang.org/2015/05/11/traits.html) in Rust.
+* These performance problems make it not suited for most real-time or low-latency applications.
+	* Although in theory GC is not necessarily inconsistent with these requirements, it is already quite hard to implement. With limited memory resources, this is even harder.
+* Some languages with need of "system programming" like C, C++ and Rust avoid GC by default.
+	* In particular, (general-purposed) GC violates [zero overhead](https://webstore.iec.ch/preview/info_isoiec18015{ed1.0}en.pdf) principle in C++, and similarly, [zero overhead abstraction](https://blog.rust-lang.org/2015/05/11/traits.html) in Rust.
 
 Note the discouragement of GC does not cover the following facilities.
 
@@ -626,11 +662,11 @@ For arithmetic systems not in the core language, some points above are still sui
 
 # Why not ...
 
-Here are some examples to illustrate how existing languages is not satisfying for the requirements. Each one should have one or more pros to be endorsed.
+Here are some examples to illustrate how existing languages fail to satisfy the requirements. Each one should have one or more pros to be endorsed.
 
 ## A brief list of requirements
 
-The following list are properties a needed language shall meet. Some languages superseded by them are also explicitly listed.
+The following list contains a (non-exhaustive) list of properties a language conforming to this document shall meet. Some languages excluded ("superseded") by them are also explicitly listed.
 
 * (A) The language has a specification independently to the implementations. This makes it supersedes many toy languages.
 	* (A.1) Further, the specification is normative. This makes it supersedes many "scripting languages".

@@ -45,6 +45,7 @@
 * [关于 GC 的意见](about-garbage-collection.md)（另见 [幻の上帝吧主题](https://tieba.baidu.com/p/3171730339)）
 * [关于语法](about-syntax.md)
 * [关于操作系统](about-operating-systems.md)
+* [关于接口](about-interface.md)
 	
 ## 语用和科普
 
@@ -58,4 +59,5 @@
 ## 观点和杂项
 
 * [《UTF-8 遍地开花宣言》批判](criticisms-on-UTF-8-everywhere-manifesto.md)
+* [字体渲染](font-rendering.md)
 
