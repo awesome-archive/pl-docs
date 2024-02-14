@@ -1,10 +1,16 @@
 ﻿# Introduction
 
-This document lists features wanted but not found (in a satisfied flavor) in existing contemporary programming languages (with some discussions and external resources presented together). It is also used as a collection of descriptions about the reasons (and the reasoning) for a new **general-purposed** language. Moreover, it implies the contents in a [requirement document](https://en.wikipedia.org/wiki/Product_requirements_document) of the language.
+This document lists wanted properties of a programming language to serve different programming environments. Most properties are provided through the *features* of a language. Some other required properties are guaranteed by deliberately lacking of specific set of features (i.e. *misfeatures*).
+
+This document shows the required properties are not found (in a satisfying flavor) coexisting in contemporary programming languages. Further, it is technically difficult to modify existing language designs to accomadate the required properties. As a result, a new language design is required. This document is therefore used as a collection of descriptions about the reasons (and the reasoning) for this new **general-purposed** language. Moreover, it implies the contents in a [requirement document](https://en.wikipedia.org/wiki/Product_requirements_document) of the language.
+
+Besides the brief requirements, some detailed discussions and external resources are presented in this document for technical interests.
+
+Not all existing programming languages are equally far away from the requirements here. Some of the languages actually have quite a lot of the desired properties, albeit still not enough. Examples of such languages are also discussed in this document.
 
 ## Disclaimers on neutrality
 
-This document tries to describe objective views on the aspects being interested by arbitrary but unspecified stakeholders of the language. Most significant aspects including generality and simplicity. However, the judgment of interests otherwise can be largely subjective. It may also be authored (and authorized) with some subjective concrete points (e.g. on the set of features) occasionally. Such points are not defects iff. there is sufficient reasoning specifically.
+This document tries to describe objective views on the aspects being interested by arbitrary but unspecified stakeholders of the language. Most significant aspects including generality and simplicity. However, the judgment of interests otherwise (including the trade-offs dealing with the conflicts between generality and simplicity) can be largely subjective. It may also be authored (and authorized) with some subjective concrete points (e.g. on the set of accepted features) occasionally. Such points are not defects iff. there is sufficient reasoning specifically.
 
 That said, any biased points without sufficient reasoning are not intended, albeit the judgment of "sufficient reasoning" is also somewhat subjective.
 
@@ -22,6 +28,17 @@ By leaving any specific domains out at first, the language needed here must be g
 
 In particular, the *smoothness conjecture* (in the section 1.1.2 of [the dissertation introducing the vau calculi](https://web.wpi.edu/Pubs/ETD/Available/etd-090110-124904/unrestricted/jshutt.pdf)) is interested in the design in this document, because a language can only become enough general-purposed by providing sufficient ability of adaption in different problem domains with effective and suited ways of abstraction in both the language to be derived and the languages being derived.
 
+With such judgement in mind, the language is expected to have following better properties:
+
+* Learning the language is easier.
+	* Learning the language features is easier, by promoting the coherence of the relationship between general purposes and general features.
+	* The utility of the efforts of learning is imporved (at least for the most common subset of the language rules), because the features can be heavily reused in a natural and uniform way, in different configurations of the design ("sublanguages").
+	* The flexibility allows users to learn a small subset of the language for a specific problem domain.
+* This nature has also positive effects on the evoluation of the language design, esp. for the future development about the extensions of the languages, because both the design of the features and the dependencies of these features can have more *orthogonal* properties (i.e. the involved subset of the language rules can be altered separatedly without having effects on each other).
+	* There would be (hopefully) less conflicts in the development.
+	* It is simpler to evaluate the effects of each design choice in the concrete configurations of the design for specific program domains.
+	* Abandoning an improper extension could be cheaper (at the cost of compatibilities).
+
 ### Conservative adoption on proposed features
 
 This document tries to follow the first sentence of the INTRODUCTION chapter in [R<sup>n</sup>RS](http://community.schemewiki.org/?RnRS) specifications and takes it more seriously (despite that the rule is not strictly obeyed by versions of R<sup>n</sup>RS themselves as this document):
@@ -36,7 +53,7 @@ Some features can be quite "large" in the sense of specification, so they are li
 
 Approved and proposed design choices are organized as the following "Outline" clause. Main highlights (pros) of a design choice as short phrases may be listed in lists, following the subclause title or the introduction paragraph.
 
-For the purpose of feasibility, concrete languages may be illustrated. They are also used as proof-of-concept resources about technical difficulties and reasonability of the design, which would not be exhaustive here.
+For the purpose of feasibility, concrete languages may be illustrated. They are also used as proof-of-concept resources about technical difficulties and reasonability of the design, which might not be exhaustive.
 
 The features are about the design of languages which can be *implementable*. This does not mean that such languages should already have actual implemenations. Nothing beyond specifications are assumed here except illustrations to prove implementation feasibility.
 
@@ -48,6 +65,7 @@ For generality, only the general-purposed properties are emphasized here, as a D
 
 * Providing a solid and reliable knowledge base to be referenced and derived
 * Maintaining a single authoritative resource with (hopefully) less cost to update features and to fix potential defects in the relevant designs
+* Giving a clear and deterministic way to evaluate the properties about implementability
 
 The language shall have a *normative* specification.
 
@@ -69,19 +87,19 @@ This is also significant to allow derived languages which require more refined c
 
 This embodies a philosophy requirement deeply: do abstract and express, rather than do reason instead. By burying the ease of the implementation under the requirement, it prioritize specific properties of interface at first. As the extent is indeed quite broad, some counterexamples are given to illustrate the intent:
 
-* Someone may conclude [a type represents falsity indicates the "crashed" state of the abstract machine](http://okmij.org/ftp/continuations/undelimited.html#introduction).
+* Someone may conclude [a type represents falsity indicates the "crashed" state of the abstract machine](https://okmij.org/ftp/continuations/undelimited.html#introduction).
 	* This is not conforming because it has introduced an implicit equivalence between "crashed state" and the [negation](https://en.wikipedia.org/wiki/Negation) of predictable states (*well-behaveness*), which is an implementation detail rather than the interface property.
 	* See also the discussion on mandatory typechecking in subclauses below for details.
 * Someone may conclude [closures imply predictable access of captures](http://lambda-the-ultimate.org/node/5007#comment-81721).
 	* The [declared notion to define the requirements](http://lambda-the-ultimate.org/node/5007#comment-81724) are based on existed language designs and even well-defined formal (denotational) semantic models, but all of them are specific to a few concrete language designs and neither of them has actually abstracted properly the need of distinction between a closure and "an object that happens to have some mutually recursive methods".
 	* This is not [historically](https://en.wikipedia.org/wiki/Closure_%28computer_programming%29#History_and_etymology) significant out of the concrete contexts above. For the original case and other simplest cases like [STLC](https://en.wikipedia.org/wiki/Simply_typed_lambda_calculus) mentioned here, the distinction is irrelevant because terms are not able to be recursively owned.
-	* Later closures are proposed to resolve the [funarg problem](https://en.wikipedia.org/wiki/Funarg_problem). However, the solution actually introduces an implicit premise relying on well-behaveness of accesses to captures, making the distinction significant. Although the problem itself is widespread (for any languages has the similar "function" notion), the solution is not adopted by all designs, so the meaning of the term "closure" is not naturally strengthened with more restrictions of well-behaveness.
+	* Later closures are proposed to resolve the [funarg problem](https://en.wikipedia.org/wiki/Funarg_problem). However, the solution actually introduces an implicit premise relying on well-behaveness of accesses to captures, making the distinction significant. Although the problem itself is widespread (for any languages having the similar "function" notion), the solution is not adopted by all designs, so the meaning of the term "closure" is not naturally strengthened with more restrictions of well-behaveness.
 	* Because nothing is otherwise required to restrict the extended meanings of "lexical" closures (used other than the simplest cases above) being well-behaved in the general sense in other directions, the contextual meaning ultimately depends on the language rules which define the term "closure". As of in general, the distinction should be still insignificant. (This approach of general terminology is also consistent to the spirit of "variables do not necessarily imply mutable states" whether the context is the so-called "functional languages" or not.)
-	* It is actually insignificant in some contemporarily designs. At least ISO C++ uses the terms [*closure object*](http://eel.is/c++draft/expr.prim.lambda#2) and [*closure type*](http://eel.is/c++draft/expr.prim.lambda#closure-1) satisfying both notions here.
+	* It is actually insignificant in some contemporarily designs. At least ISO C++ uses the terms [*closure object*](https://eel.is/c++draft/expr.prim.lambda#2) and [*closure type*](https://eel.is/c++draft/expr.prim.lambda#closure-1) satisfying both notions here.
 
 ### Examples
 
-[ISO C](http://www.open-std.org/jtc1/sc22/wg14/) and [ISO C++](http://www.open-std.org/jtc1/sc22/wg21/) fall in this category. Most others (like [Java](https://docs.oracle.com/javase/specs/jls/se11/html/index.html)) are not. Some languages only have undefined behavior in contexts which need to interact with the languages having this feature, e.g. `unsafe` in [C#](https://en.wikipedia.org/wiki/C_Sharp_%28programming_language%29) (specified by [ECMA-334](https://www.ecma-international.org/publications/standards/Ecma-334.htm)).
+[ISO C](https://www.open-std.org/jtc1/sc22/wg14/) and [ISO C++](https://www.open-std.org/jtc1/sc22/wg21/) fall in this category. Most others (like [Java](https://docs.oracle.com/javase/specs/jls/se11/html/index.html)) are not. Some languages only have undefined behavior in contexts which need to interact with the languages having this feature, e.g. `unsafe` in [C#](https://en.wikipedia.org/wiki/C_Sharp_%28programming_language%29) (specified by [ECMA-334](https://www.ecma-international.org/publications/standards/Ecma-334.htm)).
 
 ## Calculi based
 
@@ -98,13 +116,13 @@ It can also keep the specification essentially (formally) simple without certain
 
 As a minor concern, lack of designated models may introduce controversial views between existing languages and the models, which seriously undermines the value of any other candidates in practice. For example, the case about so-called [OO languages](http://www.atalon.cz/om/what-is-a-metaclass) reveals that almost all industrial OO languages are not well-formalized for years. Introducing a model specifically for the design of a language can avoid such embarrassment for that language, although there is still room of divergence on the topic of common properties among different languages.
 
-A notable exception is [Standard ML](http://sml-family.org/). A recent version of its specification is [here](http://sml-family.org/sml97-defn.pdf).
+A notable exception is [Standard ML](https://sml-family.org/). A recent version of its specification is [here](https://sml-family.org/sml97-defn.pdf).
 
-A secondary kind of such category is an informal model (usually expressed in natural language) in the specification, which can be formalized later. This is considered compromised to the purpose of formal specification. Nevertheless, a few languages can have the work together in their specifications. For example, the Scheme language have more than one models in various R<sup>n</sup>RS specifications in their appendix, but they are not normative. For Scheme, there are also standalone detailed documents like [this](http://users.eecs.northwestern.edu/~robby/pubs/papers/jfp2008-mf.pdf).
+A secondary kind of such category is an informal model (usually expressed in natural language) in the specification, which can be formalized later. This is considered compromised to the purpose of formal specification. Nevertheless, a few languages can have the work together in their specifications. For example, the Scheme language have more than one models in various R<sup>n</sup>RS specifications in their appendix, but they are not normative. For Scheme, there are also standalone detailed documents like [this](https://users.eecs.northwestern.edu/~robby/pubs/papers/jfp2008-mf.pdf).
 
-Some non-specifications for existing language dialects also fall in this category, like [[Muller92]](http://www.cs.bc.edu/~muller/research/postscript/toplas92.ps) and [[Ellison12]](http://fsl.cs.illinois.edu/pubs/ellison-2012-thesis.pdf).
+Some non-specifications for existing language dialects also fall in this category, like [[Muller92]](http://www.cs.bc.edu/~muller/research/postscript/toplas92.ps) and [[Ellison12]](https://fsl.cs.illinois.edu/publications/ellison-2012-thesis.pdf).
 
-There exist works on formal models to improve current language specifications, like [this](http://fsl.cs.illinois.edu/pubs/ellison-2012-thesis.pdf). Similar work can identify the issue on some existed specification that is normative (but not based on formal models), like [this](https://github.com/cplusplus/draft/issues/2541).
+There exist works on formal models to improve current language specifications, like [this](https://fsl.cs.illinois.edu/publications/ellison-2012-thesis.pdf). Similar work can identify the issue on some existed specification that is normative (but not based on formal models), like [this](https://github.com/cplusplus/draft/issues/2541).
 
 A more specific requirement is the model should be *computational*, as a general language is always implemented with [*computational effects*](https://www.sciencedirect.com/science/article/pii/S1571066104050893/pdf), rather than by *(equational) reasoning*. The latter is centric in the models for some DSL (e.g. languages used in proof assistants) and some implementation methodologies (e.g. program transformation), but it is not necessarily in the designs of general-purposed languages. This is the main reason why "calculi" rather than more generic (arbitrary) "models" are focused here.
 
@@ -116,16 +134,16 @@ Calculi are refinement of [*rewrite systems*](https://en.wikipedia.org/wiki/Rewr
 
 ### Named calculi based
 
-Like some traditional languages based on [lambda calculi](https://en.wikipedia.org/wiki/Lambda_calculi), with the ability to introduce names.
+* Like some traditional languages based on [lambda calculi](https://en.wikipedia.org/wiki/Lambda_calculi), with the ability to introduce names.
 
-Such a calculus provides a form of *abstraction* allowing expressing *substitution* with explicitly named *variables* directly, whose results embody the notion of *reusable* building blocks of computation. The most famous example of such device of abstraction is the [lambda abstraction](https://en.wikipedia.org/wiki/Lambda_calculus). As the part of one of the earliest formal models aiming to describe computation in general, it can be the prototype of many other similar facilities. It is also the *de facto* formal prototype of the so-called "function" (rather than [most ones in mathematics](https://en.wikipedia.org/wiki/History_of_the_function_concept)) in most contemporary programming language, even in languages whose designers do not have knowledge of formal models (but just derive the language from the *prior arts*). With the implied *name bindings*, Such device is handy to convey the *meaning* of components of programs in practice, as it directly provides formalized *explicit* (named) ways to describe the *input* (via zero or more named *parameters* in the abstraction) and the defined *output* (via the subterm as the *body* of the abstraction) independently, so users can establish *fine-grained* or the *minimal* local dependencies among some subsets of such program components on demand. One more benefit is that such program components can have computational effects both pure and non-pure without changes to the syntax, which effectively [separate the concerns](https://en.wikipedia.org/wiki/Separation_of_concerns) of the objects being modeled and specifically interested side effects tied on them, in a flexible way. Further, such separation enables a way to implement additional computational effects through some extensions of the deductive rules on existing calculi, so it also separates the concerns to language authors in the way of tailoring the feature set of the languages in some degrees, and the specializations of such a family of languages can be separately developed (by iteration) in a more engineering-friendly way. 
+Such a calculus provides a form of *abstraction* allowing expressing *substitution* with explicitly named *variables* directly, whose results embody the notion of *reusable* building blocks of computation. The most famous example of such device of abstraction is the [lambda abstraction](https://en.wikipedia.org/wiki/Lambda_calculus). As the part of one of the earliest formal models aiming to describe computation in general, it can be the prototype of many other similar facilities. It is also the *de facto* formal prototype of the so-called "function" (rather than [most ones in mathematics](https://en.wikipedia.org/wiki/History_of_the_function_concept)) in most contemporary programming language, even in languages whose designers do not have knowledge of formal models (but just derive the language from the *prior arts*). With the implied *name bindings*, Such device is handy to convey the *meaning* of components of programs in practice, as it directly provides formalized *explicit* (named) ways to describe the *input* (via zero or more named *parameters* in the abstraction) and the defined *output* (via the subterm as the *body* of the abstraction) independently, so users can establish *fine-grained* or the *minimal* local dependencies among some subsets of such program components on demand. One more benefit is that such program components can have computational effects both pure and non-pure without changes to the syntax, which effectively [separate the concerns](https://en.wikipedia.org/wiki/Separation_of_concerns) of the objects being modeled and specifically interested side effects tied on them, in a flexible way. Further, such separation enables a way to implement additional computational effects through some extensions of the deductive rules on existing calculi, so it also separates the concerns to language authors in the way of tailoring the feature set of the languages in some degrees, and the specializations of such a family of languages can be separately developed (by iteration) in a more engineering-friendly way.
 
 On the contrast, more low-level systems like [combinatory logic](https://en.wikipedia.org/wiki/Combinatory_logic) avoid the abstraction facilities, so users have to manually get it to work via mappings with an *implicit* (e.g. *[point-free](https://en.wikipedia.org/wiki/Tacit_programming)*) style (like functions in traditional mathematics, e.g. combinators in combinatory logic), albeit such mappings themselves are often considered central in a more high-level (more abstractive) kind of coding manner (by the guarantee of leaking less implementation details). Such use may benefit in succinct programs (and prevent headache on naming in nature). However, enforcing it uniformly in a general-purposed programming language is essentially unnecessarily *restrictive* to the choices of users on how to assign meaning to things being consumed by the devices of abstraction. It is also *essentially difficult to program* in general cases. Thus, it is never capable enough in practice except for serving to some *very* specific problem domains. In fact, except quite a few exceptions like the [identity function](https://en.wikipedia.org/wiki/Identity_function) (as the `I` combinator in the [SKI combinator calculus](https://en.wikipedia.org/wiki/SKI_combinator_calculus)), most implicit fundamental mapping (without specific pre-defined meanings in the problem domain) are so sophisticated to reason about, that devices of abstraction in explicit style are often used instead in various ways:
 
 * A convenient mean to express the semantic definitions of such mappings is to use lambda abstractions instead. This is even *canonical* [in the most foundational level in such a system](https://en.wikipedia.org/wiki/SKI_combinator_calculus#Recursive_parameter_passing_and_quoting).
 * During programming using such systems, users have to introduce devices of abstraction in explicit style to figure the mappings out (see examples below).
 
-A notable example NOT in the category is [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck), whose "parent" model is [P''](https://en.wikipedia.org/wiki/P′′). Another is [the Unlambda programming language](http://www.madore.org/~david/programs/unlambda/), which implements a dialect of combinatory logic. Different to name-based calculi, the tokens or characters in such languages does not represent *names*. Thus, variable bindings cannot be introduced directly. As a result (and the example of the major difficulty to use them in practice), to figure out how to encode program logic as native mappings (in implicit style, like "functions" in Unlambda) usually requires users first to know the counterpart of the devices of the abstraction in explicit style, like [in lambda abstractions](http://www.madore.org/~david/programs/unlambda/#howto).
+A notable example NOT in the category is [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck), whose "parent" model is [P''](https://en.wikipedia.org/wiki/P%E2%80%B2%E2%80%B2). Another is [the Unlambda programming language](http://www.madore.org/~david/programs/unlambda/), which implements a dialect of combinatory logic. Different to name-based calculi, the tokens or characters in such languages does not represent *names*. Thus, variable bindings cannot be introduced directly. As a result (and the example of the major difficulty to use them in practice), to figure out how to encode program logic as native mappings (in implicit style, like "functions" in Unlambda) usually requires users first to know the counterpart of the devices of the abstraction in explicit style, like [in lambda abstractions](http://www.madore.org/~david/programs/unlambda/#howto).
 
 The (untyped) [lambda calculus](https://en.wikipedia.org/wiki/Lambda_calculus) is the typical baseline model for its historical significance.
 
@@ -144,7 +162,13 @@ See subclauses below for other details.
 * Allowing native (mutable) states natively
 	* No need to "compile" manually to get the states transformed
 
-The formal model of impure variant of lambda calculi are relatively recent compared to the practical languages with the feature. See [[Plo75]](http://homepages.inf.ed.ac.uk/gdp/publications/cbn_cbv_lambda.pdf) and [[Fe91]](https://www2.ccs.neu.edu/racket/pubs/scp91-felleisen.ps.gz).
+For the necessity of impure effects, see the subclause of first-class effects below.
+
+The formal model of impure variant of lambda calculi are relatively recent compared to the practical languages with the feature. See [[Plo75]](https://homepages.inf.ed.ac.uk/gdp/publications/cbn_cbv_lambda.pdf) and [[Fe91]](https://www2.ccs.neu.edu/racket/pubs/scp91-felleisen.ps.gz).
+
+Note that the impurity are conflict to [*η-reduction*](https://en.wikipedia.org/wiki/Lambda_calculus#%CE%B7-reduction), because the combination of the operator with "empty" operand is confilct with the referencing of the operator itself. This is direct in the syntax, and also unavoidable in the semantic without further modifications on the reduction rules.
+
+More precisely, the pure calculi can support bidirectional *η-conversion*. As a model of computation (rather than logic), enforcing the direction to produce the computational result (if any) by default is important, so insisting on the bidirectional conversion is quite a misfeature. And without the bidirectional conversion applicable to do the equational reasoning in various contexts, the reduction itself is far less impressive, and even redundant. Thus, abandoning η-reduction is a plausible choice to make the language rules succinct. It is even natural when side effects are needed.
 
 ##### Lexical scoped impure lambda calculi based
 
@@ -181,14 +205,96 @@ First-class entities are also important for abstraction, because abstraction is 
 
 An *object* is an entity which preserve its identity. Unless otherwise specified, any two objects can be differentiated by the identity. This definition has more restrictions of the identity compared to the one in the dissertation introducing the vau calculi (which is called as a first-class entity, see above).
 
-The identity is needed for [ontology](https://en.wikipedia.org/wiki/Ontology) purpose. Although when not built-in, it can still be expressed by derived languages from the base specification, the essence of generality makes this approach unnecessarily *indirect* in the whole design. This is the very same reason compared to the reason about keeping expressiveness of [*side effects*](https://en.wikipedia.org/wiki/Side_effect) in the base specification (rather than providing them through the derived languages), as well as the reason of allowing the programs being *stateful* (see also first-class states below): if a language is lacking of these essential features by design, it is more suited to be a target language [being transformed to](https://en.wikipedia.org/wiki/Program_transformation) (e.g. by a [compiler](https://en.wikipedia.org/wiki/Compiler) during translation of a source program, or within a [proof assistant](https://en.wikipedia.org/wiki/Proof_assistant) during verifying some properties of a source program), but not a language used by human users directly.
+The identity is needed for [ontology](https://en.wikipedia.org/wiki/Ontology) purpose. Although when not built-in, it can still be expressed by derived languages from the base specification, the essence of generality makes this approach unnecessarily *indirect* in the whole design.
+
+### First-class effects
+
+* Allowing programmability over computational effects in a same manner
+* Enabling possibilities customization of effects in the object language
+
+Support of computational effects are crucial in a general-purposed language.
+
+There can be many *kinds* of effects. Basically, these are two sorts, *pure* and *impure*, which are both needed in the required design:
+
+* Pure effects determine the value of computation, which is typically the result expressed in expressions after their evaluation.
+	* In programming languages based on a calculus with recursively composed terms (expressions) in its syntax, pure effects are not avoidable in practice.
+* Impure effects determine the potential changes of the state of the execution of the program which are not directly seen in the expressions.
+	* They are [*side effects*](https://en.wikipedia.org/wiki/Side_effect) to the evaluations.
+	* Impure effects can be avoided largely by using the so-called [purely functional programming](https://en.wikipedia.org/wiki/Purely_functional_programming) paradigm. However, this is specifically rejected here. See the misfeature subclauses below.
+* Different kind of effects can model different computations in specific domains.
+	* Pure effects model the processes of traditional pure mathematical computations, like numerical computations (ignoring the floating-pointing evrironment).
+	* Impure effects can model (mutable) states. See the subclause about first-class states below.
+	* Impure effects can model program control. See the subclause about first-class continuations below.
+
+As a computational device, effects shall be *composable* in some degrees.
+
+* Pure effects naturally composed over the syntactic combination of terms: the result of an expression can be defined as the combination of the results of its subexpressions.
+* Impure effects are not so easy to compose naturally, because their outcome on the program behavior usually depend on the occurence of other effects and the order of comosition, and not all of them can be coexisted  meaningfully.
+	* For example, the effect of modifaction on a memory location is a side effect, which will overwrite the previous effect of same kind. And concurrent effects of this kinds without sufficient synchronization often cause unpredictable program state.
+	* There need a programmable mechanism to specify which manners are acceptable by users.
+	* There need some semantic rules to prevent the potential unpredicatable states by default, or it is too error-prone.
+
+Note that keeping the identity over the first-class objects has the very same reason compared to the reason about keeping expressiveness of side effects in the base specification (rather than providing them through the derived languages) here.
+
+#### Structrual sanity requirements on the programmable effect system
+
+As of the basis of the reasoning about extensibility, there is at least one additional sanity requirement on the structrual description of the first-classness. That is, the first-class effects shall be extensible based on the effect kinds have less restrictions, if any.
+
+This implies:
+
+* Pure effects are programmably implementable as and effectively considered a special case of general (perhaps impure) effects, with the restriction to prove it pure in the concerned contexts.
+	* The approach to enforce purely functional style by default as well as some effectful exceptional entities is not an acceptable design choice here.
+* Type qualifiers having different kinds of restrictions on entities (like ISO C's `const` and `volatile`) are orthogonal and not comparable by default.
+	* Both `const` and `volatile` are more restrictive to the unqualified types. In the (C++'s) type system parlance, for some complete object type `T`, both `const T` and `volatile T` are subtypes of `T` (which are used as inhabitant expression of type `T` after lvalue conversions). Similarly, `T*` is a subtype of both `const T*` and `volatile T*` (due to the contravariant nature on cv-qualification of pointer type constructor `*`). But there is no such relationship between `const T` and `volatile T`, or between `const T*` and `volatile T*`.
+	* On the contrast, forming the basis by placing the immutability (e.g. by some `mutable` which negates `const`) in the default preset to be the basis is not acceptable.
+
+This is made for the purpose of extensibility about the programmable restrictions.
+
+* The rule ensures that the action of adding some restrictions being more comprehensive and easier to express.
+* The rule also prevents some difficulties so there are less chances to lose the orthogonality of the restrictions too early.
+
+Making the restrictions themselves composable can be quite natural. For example, both `const T` and `volatile T` can be formed directly by some type constructors named as `const` and `volatile` with a single type parameter `T`. (The type constructors are actually `std::add_const_t` and `std::add_volatile_t` in ISO C++ for a complete object type `T`.) On contrast, allowing something like `mutable` to qualify `T` in the same manner requires some more rules (e.g. pattern matching rules on the inner structure of the entity denoted by the signature `T`) to absorb the yet unknown `T`, to reflect the qualification has proved the fact that `mutable T` has more restrictions about mutability over `T`.
+
+The remained orthogonal properties seem more subtle. Consider some language with immutablity on objects by default, for example, Rust. Rust actually mixes concurrent properties as well: objects can be "shared read-only" or "uniquely owned read-writable". Users have no choice to specify the "mutable" property on an entity directly and preciesly. Although Rust rejects to allow shared mutable objects by default, it still needs to provide workaround as ["interior mutability"](https://doc.rust-lang.org/core/cell/index.html). This does not necessarily make the language more difficult to learn, but any effort to add a new kind of "mutability" in the language will be significantly costly. It can be realistic once the implementation can reason mutability (based on some user-provided contextual equality) instead of the modifiability (based on hard-coded equality) for constant propagation. As a result, the lack of orthogonality harms the chance of some more optimal implementaions.
+
+#### Distinguishing of the effect kinds
+
+Either by inference or user-provided annotations, the design shall provide some mechanisms to distinguish different kinds of the effects (before further to name the kinds as first-class objects):
+
+* Pure and impure effects are distinguished.
+	* This allows users to encode the intentional use of pure effects on domains requiring out-of-order composition of the code.
+	* This enables the possibilities of many traditional common optimizations of the code (like [constant folding](https://en.wikipedia.org/wiki/Constant_folding) and [common subexpression elimination](https://en.wikipedia.org/wiki/Common_subexpression_elimination)) depending on the purity directly programmable in the object language.
+	* It is also necessary to allow users to mimic a mostly purely functional paradigm in the program.
+* Control effects are distinguished from other kinds of impure effects.
+	* This allows users to encode the intentional use of the default control differently from others, e.g. to mark exceptional-free code explicitly (like C++'s `noexcept` specifier).
+	* This enables some possibilities of control transformation optimizations, e.g. elimination of trivial exception handling code which should logically has no control effects but difficult to be proved syntactically.
+* Other impure effects are further distinguished on demand.
+	* This enables the possibilites of some more advanced code transformations in higher-level domain-specific abstractions. See below.
+
+One of a notable application of the last case listed above is to model the effects in I/O (input/output) operatons.
+
+* Such operations are potentially effectful.
+	* In essense, I/O imply side effects.
+* However, the specifications in most popular language for these notions are often defective due to lack of imprecise.
+	* Under the definitions used by some specifications (at least in ISO C and ISO C++), this is not guaranteed. Instead, they may have side effects or not, and nothing can be assumed without the implementation details. This is underspecified and the implementation cannot optimize them even there are provable pure parts (e.g. operations on the so-called memory streams).
+* To clarify the case, I/O operations here refer to the parts which are (strictly) statically unprovable to avoid the *I/O effects*.
+	* This requires the ability to distinguish different kinds of effects (here, I/O effects and other non-I/O ones) in some *nominal* way, because without the additional information (like in ISO C and ISO C++), different kinds are structrual equivalent and no differences can be found with other rules to aid to the further optimizations.
+	* The I/O effects shall be known having different characteristics from non-I/O effects such as the effects of modification on (non-`volatile`) objects in the abstract machine, so there can be different treatments on verification and optimization.
+	* The possiblity of the optimizations enabled by the additonal optimizations vary.
+		* Elimination of the effects implied by some paired `getc` and `ungetc` calls on memory streams can be a simple distinguishing example.
+
+The mechanism to distinguish different kinds of effects shall include some way to determine whether an evaluation on some specific expression is definitely having some specific kinds or not where the differences are applicable in the contexts.
+
+Note to distinguish the kinds of effects not necessarily meaning *partition* on them, i.e. different kinds may have common non empty subset of instances of effects. The only exception is that pure and impure ones are mutual exclusive, by definition.
 
 ### First-class states
 
 * Allowing a normative way of distinction of different side effects
-* Enabling possibilities to specific kinds of customized effects (e.g. ISO C style `volatile`)
+* Enabling possibilities to specific kinds of customized side effects (e.g. ISO C style `volatile`)
 
-By specifying identity on objects, side effects can be bound on objects with restricted number of instances. The restriction ensures the effects on the object are not duplicated or eliminated unexpectedly.
+By specifying the identity on objects, side effects can be bound on objects with restricted number of instances. The restriction ensures the effects on the object are not duplicated or eliminated unexpectedly.
+
+Note that keeping the identity over the first-class objects has the very same reason compared to the reason to allow the programs being *stateful*: if a language is lacking of these essential features by design, it is more suited to be a target language [being transformed to](https://en.wikipedia.org/wiki/Program_transformation) (e.g. by a [compiler](https://en.wikipedia.org/wiki/Compiler) during translation of a source program, or within a [proof assistant](https://en.wikipedia.org/wiki/Proof_assistant) during verifying some properties of a source program), but not a language used by human users directly.
 
 ### First-class continuations
 
@@ -203,9 +309,9 @@ The reified continuation is first known as the result of [`call/cc` operator](ht
 * Allowing more reasonably implementable features on continuations
 * Simplification on user programs using first-class continuations
 
-Scheme's continuations [do not compose](http://okmij.org/ftp/continuations/undelimited.html#introduction). This limit its practical use. It can be resolved by introducing control delimiters. The resulted continuations are *delimited continuations*. It is also considered [superior to undelimited one [in any reasonable practical case](http://okmij.org/ftp/continuations/against-callcc.html).
+Scheme's continuations [do not compose](https://okmij.org/ftp/continuations/undelimited.html#introduction). This limit its practical use. It can be resolved by introducing control delimiters. The resulted continuations are *delimited continuations*. It is also considered superior to undelimited one [in any reasonable practical case](https://okmij.org/ftp/continuations/against-callcc.html).
 
-There are various of control operators for building delimited continuation. About their expressiveness, see [here](http://okmij.org/ftp/continuations/#impromptu-shift).
+There are various of control operators for building delimited continuation. About their expressiveness, see [here](https://okmij.org/ftp/continuations/#impromptu-shift).
 
 ### Case studies
 
@@ -217,7 +323,7 @@ C and C++ lack first-class objects as the objects can have decayable types like 
 	* No need to abstract loops specifically
 * Allowing users to extend the mechanism when needed, with minimal compact to existing syntax
 
-This is an important property exposed by the language design with mandatory rules. See [[Cl98]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.8567&rep=rep1&type=pdf) for formalization on a dialect of the Scheme language. This property is generally language-neutral, and it can be adopted in new language designs.
+This is an important property exposed by the language design with mandatory rules. See [[Cl98]](https://www.researchgate.net/profile/William_Clinger/publication/2728133_Proper_Tail_Recursion_and_Space_Efficiency/links/02e7e53624927461c8000000/Proper-Tail-Recursion-and-Space-Efficiency.pdf) for formalization on a dialect of the Scheme language. This property is generally language-neutral, and it can be adopted in new language designs.
 
 Note *PTC (proper tail call)* is NOT same to *TCO (tail call optimization)*. See [here](https://groups.google.com/d/msg/comp.lang.lisp/AezzhxTliME/2Zsq7HUn_ssJ) for clarification.
 
@@ -239,9 +345,11 @@ Nevertheless, syntactic forms at the call sites are still far from correct, beca
 
 ### Evlis tail calls
 
-* Known most efficient way in space being compatible to pass-by-value semantics
+* Known most efficient way in space being compatible to pass-by-value semantics not relying on the restrictions on the structure of the activation record frames
 
-See [[Cl98]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.8567&rep=rep1&type=pdf) and [this page](https://www.akalin.com/evlis-tail-recursion) for introduction.
+See [[Cl98]](https://www.researchgate.net/profile/William_Clinger/publication/2728133_Proper_Tail_Recursion_and_Space_Efficiency/links/02e7e53624927461c8000000/Proper-Tail-Recursion-and-Space-Efficiency.pdf) and [this page](https://www.akalin.com/evlis-tail-recursion) for introduction.
+
+Note the sfs (safe-for-space) requirement is considered too restrictive here.
 
 ### Reasonable performance hit
 
@@ -249,7 +357,7 @@ See [[Cl98]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.8567&re
 
 PTC may have performance penalty. The cost is generally unavoidable when there is no "native" PTC (provided by the underlying implementation language) available, so more effort should be taken for maintenance work of the additional data structure serving to bookkeeping. Only in limited cases when it can be proved that no such work is needed, the cost can be eliminated, but (depending on the feature set of the language) the proof itself can also be costly. The performance penalty should still be reasonably insignificant at least with the configurations for end-users in practice, so the cost does not defeat the general availability of the feature.
 
-There exist misnomers that PTC or TCO will be harmful to diagnostics and/or availability of debugging information. This is red herring in general. It is true that by implementation experience, PTC implemented by languages without native capability of PTC (which usually requires TCO) needs more complicated mechanism to save the history of the activation record frames avoided by PTC in the call trace compared to naive implementations of ALGOL-like languages based on the "native" ([ISA](https://en.wikipedia.org/wiki/Instruction_set_architecture)-level) [call stack](https://en.wikipedia.org/wiki/Call_stack), but the extra effort (e.g. a [CHICKEN](https://en.wikipedia.org/wiki/CHICKEN_%28Scheme_implementation%29)-style [shadow stack](https://en.wikipedia.org/wiki/Shadow_stack) specifically for debug implementations like [in JSC of Webkit](https://bugs.webkit.org/show_bug.cgi?id=155598)) is not unreasonably. 
+There exist misnomers that PTC or TCO will be harmful to diagnostics and/or availability of debugging information. This is red herring in general. It is true that by implementation experience, PTC implemented by languages without native capability of PTC (which usually requires TCO) needs more complicated mechanism to save the history of the activation record frames avoided by PTC in the call trace compared to naive implementations of ALGOL-like languages based on the "native" ([ISA](https://en.wikipedia.org/wiki/Instruction_set_architecture)-level) [call stack](https://en.wikipedia.org/wiki/Call_stack), but the extra effort (e.g. a [CHICKEN](https://en.wikipedia.org/wiki/CHICKEN_%28Scheme_implementation%29)-style [shadow stack](https://en.wikipedia.org/wiki/Shadow_stack) specifically for debug implementations like [in JSC of Webkit](https://bugs.webkit.org/show_bug.cgi?id=155598)) is not unreasonably.
 
 ## Free store'd activation records
 
@@ -260,6 +368,8 @@ There exist misnomers that PTC or TCO will be harmful to diagnostics and/or avai
 * Allowing resource usage being configured uniformly through interface of the [free store](https://en.wikipedia.org/wiki/Memory_management#Dynamic_memory_allocation)
 
 This approach does not use "native" control stack provided by traditional [ISA (instruction set architecture)](https://en.wikipedia.org/wiki/Instruction_set_architecture). Losing direct support from hardware seems inefficient, but not much. Practical implementations can use such strategy as well. For example, [SML/NJ](https://www.smlnj.org/) uses heap-allocated stack frames.
+
+Note that this approach does not implicitly mandate a general-purpose glabal store. Whether a global store used for activation records, or the number of instances of the stores provieded by the design, are all details not concerned here. See the "avoidence of mandatory" subcluases below.
 
 ## Deterministic deallocation
 
@@ -278,23 +388,42 @@ C++ is an example supporting such feature by destructors. Another similar exampl
 
 ### Necessity
 
-A language lacking deterministic deallocation may require [GC (garbage collection)](https://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29), if it does allow allocation of resources (so it can be a general-purposed language) and it does not avoid collection at all (to avoid leaking the allocated resources totally). GC can be deterministic with reference counting, but it cannot handle cyclic references properly. Tracing GC is not deterministic. This makes it in general not fit for resources other than memory and there have to be different mechanism to handle different kind of resources, like finalizers, which may lead to complex problems like [object resurrection](https://en.wikipedia.org/wiki/Object_resurrection). Even for memory, it will leak if not called in time. Most garbage collectors have STW (stop-the-world) problem on collection, and they are often not friendly to memory efficiency and real-time applications by default. Thus, GC is better opt-in for a general-purposed language.
+A language lacking deterministic deallocation may require [GC (garbage collection)](https://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29), if it does allow allocation of resources (so it can be a general-purposed language) and it does not avoid collections at all (to avoid leaking the allocated resources totally).
+
+Deterministic deallocation is preferred to the mandatory of GC for multiple reasons. Typically, GC make troubles not existed at the first place where the deterministic deallocation is available.
+
+* GC can be (somewhat) deterministic with reference counting, but it cannot handle cyclic references properly.
+* Tracing GC is not deterministic. This makes it in general not fit well for resources other than memory and there have to be different mechanism to handle different kind of resources (e.g. by finalizers), which may lead to complex problems like [object resurrection](https://en.wikipedia.org/wiki/Object_resurrection).
+* Even for memory, GC will leak if the collection not called in time.
+	* This is worse in practice because the collection is not always guaranteed available in the object language.
+	* Even the collection is available in the object language, it can be simply a non-binding request. The call can be delayed or even ignored by the runtime, and there is generally no other reliable way to prevent the uncertainty.
+	* As the result, programmers have effectively lose the control of deterministic memory management by default. Such GC has no capability to replace deterministic deallocation (whether it is tracing or not).
+* Most garbage collectors have the [STW (stop-the-world)](https://en.wikipedia.org/wiki/Tracing_garbage_collection#Stop-the-world_vs._incremental_vs._concurrent) problem on collection, and they are often not friendly to memory efficiency and real-time applications by default.
+
+Thus, GC is better opt-in for a general-purposed language.
 
 # Avoidance of mandatory
 
-Mandatory of some features may be problematic in general, although they can be opt-in. They are listed in following subclauses.
+Mandatory of some features may be problematic in general.
 
-In general, making some features to be *derivative* (as *derivations*) in libraries (rather than to be *primitives* specified by the core language rules) is beneficial for various reasons.
+* Some of these features are misfeatures and [considered harmful](https://en.wikipedia.org/wiki/Considered_harmful). Inclusion of them oftn has predicatable problems not worth tweaking the remaining design of the language.
+	* They may introduce unwanted assumptions and such assumptions are often unneeded restrictions. It is at least suspicious to consider them as genuine "features" for a general-purposed language.
+	* They may logically conflict with other features.
+	* They may break or undermine the guarantees provided by the remaining design.
+	* They may lead to significant difficulties on the consistency of the design, e.g. the methods to maintain the compatibility.
+* Other features may be desired without frustrations like misfeatures, but they are considered too specific.
+	* With respect to the property about being general-purposed of a language, they are the exact targets to be opt-in, rather than to be built-in.
+	* Being built-in as *primitives* specified by the core language rules may have predicatable cons, hence premature optimizations.
+		* Fixed primitives design may rely on other language features (like complex type systems) too eagerly. The dependencies are not easy to eliminate in practice, and it is particularly annoying when different pieces of the specification clash due to the premature complexity in developing a language.
+		* There are more than one styles of primitives for a specific but not precisely-defined functionality. Each has pros and cons up to the specific target domains. Fixed the design of primitives can easily undermine the general-purposed properties of the language, thus considered harmful.
+	* On the other hand, being opt-in by user programs as *derivations* (e.g. in the libraries) instead is beneficial for various practical reasons.
+		* Derivations in libraries can be tested with different designs for experience on different domains, leaving the freedom of choices to the users.
+		* Derivations are immune to the overhead and complexity (both in the language specification and use cases of userland) when they are not used.
+		* Derivations may be developed and verified separately without interfering compatibility issues among language specification updates. This enables the ability of parallelism in development of the language design.
 
-* There are more than one styles of primitives for a specific but not precisely-defined functionality. Each has pros and cons up to the specific target domains. Fixed the design of primitives can easily undermine the general-purposed properties of the language, thus [considered harmful](https://en.wikipedia.org/wiki/Considered_harmful).
-* Fixed primitives design may rely on other language features (like complex type systems) too eagerly. The dependencies are not easy to eliminate in practice, and it is particularly annoying when different pieces of the specification clash due to the premature complexity in developing a language.
-* On the other hand, derivations in libraries can be tested with different designs for experience on different domains, leaving the freedom of choices to the users.
-* Derivations are immune to the overhead and complexity (both in the language specification and use cases of userland) when they are not used.
-* Derivations may be developed and verified separately without interfering compatibility issues among language specification updates. This enables the ability of parallelism in development of the language design.
+Some features may consist of both kinds at the first look. They may or may not be decomposed into different kinds. Nevertheless, the mixture often suggests it is over-complicated to be a core language feature. In general, better avoid a feature being ruled as primitives. Otherwise, evaluate the gain vs. cost before introducing primitives to ensure such choice is indeed preferred.
 
-So better avoid a feature being ruled as primitives; otherwise, evaluate the gain vs. cost before introducing primitives to ensure such choice is indeed preferred.
-
-Some other features are considered harmful because of introducing the unwanted assumptions and such assumptions are often unneeded restrictions. It is at least suspicious to consider them as "features" for a general-purposed language.
+The features fail to fall in the category of primitives according to the method above are listed in following subclauses.
 
 ## Phases and stages
 
@@ -310,12 +439,12 @@ Moreover, separation of phases cause confusions. Informally, there [exists peopl
 
 Both points do not work in general, because:
 
-* 1) "To run" means *a priori* separation, as an explicit emphasized form of "runtime" phase in the lifetime the product.
-	* Although this is not in the phases of *translation* in strictly sense, it is still largely redundant for similar reasons proposed here.
-	* It is possible to eliminate this separated "run" phase by some real-time analysis which "runs" simultaneously *before deployment*. This *unified* approach should provide same (if not more) benefits for automatic verification.
-	* The situation of separation vs. unified phases here is a bit like [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) vs. [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) compilation. Both cases require some trading off to determine how much dynamic properties to be resolved later. However, while JIT does have some obvious weakness about the cost and quality of the result, it is not yet clearly known how unified approach is more deficient in practice.
+* 1) "To run" means *a priori* separation, as an explicitly emphasized form of "runtime" phase in the lifetime the product.
+	* Although this is not in the phases of *translation* strictly, it is still largely redundant for similar reasons proposed here.
+	* It is possible to eliminate this separated "run" phase by some real-time analysis which "runs" simultaneously *before the deployment*. This *unified* approach should provide the same (if not more) benefits for automatic verification.
+	* The situation of separation vs. unified phases here is a bit like [AOT](https://en.wikipedia.org/wiki/Ahead-of-time_compilation) vs. [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) compilation. Both cases require some trading-off to determine how much dynamic properties to be resolved later. However, while the JIT approach does have some obvious weakness on the cost and quality of the result, it is not yet clearly known how the unified approach is more deficient in practice (due to lacking of experience, probably).
 * 2) Separation of concerns has essentially nothing to do with separation of phases in nature.
-	* Separation of concerns is a principle towards better interface design *all around*, rather than something buried in subtle language-specific details to implement the principle. The required "distinction" approach will either leak abstraction based on assumptions not always available in the interface design or make it simply not feasible and implementable.
+	* Separation of concerns is a principle towards better interface design *all around*, rather than something buried in subtle language-specific details to implement the principle. The required "distinction" approach will either leak the abstraction based on assumptions not always available in the interface design or make it simply not feasible and implementable.
 	* The original text is in a response to criticize the Kernel language, so it actually not only requires the *distinction* literally, but also requires it being more aggressively *built-in* in the language. Even distinction between different phases can convey the idea well enough, *separation* them with *globally* ordered subset of rules in the language is overspecified. In contrast, avoiding assumptions on phases *ruled explicitly by the language* still does not prevent *users* to introduce required distinctions *locally*.
 	* Arbitrary distinction of phases is directly broken when a solution needs to express similar things across different phases, so any predefined phases will undermine the separation and/or code bloat (as similar code duplicated across phases).
 
@@ -329,7 +458,7 @@ Both ISO C and ISO C++ specify phases of translation.
 
 [Racket](https://racket-lang.org) has [compile and run-time phases](https://docs.racket-lang.org/guide/stx-phases.html).
 
-[MetaOCaml](http://okmij.org/ftp/ML/MetaOCaml.html) facilitates multi-staging programming as the prominent feature, which assumes separately handling of staged code.
+[MetaOCaml](https://okmij.org/ftp/ML/MetaOCaml.html) facilitates multi-staging programming as the prominent feature, which assumes separately handling of staged code.
 
 ### Counterexamples
 
@@ -338,6 +467,33 @@ Kernel and [PicoLisp](https://picolisp.com) do not mandate explicit phases.
 ## Forms of translation
 
 Some language like [Java](https://docs.oracle.com/javase/specs/jls/se11/html/index.html) specifies the translation as compilation (even now it has a [REPL (read-eval-print loop)](https://en.wikipedia.org/wiki/Read–eval–print_loop)-style interface named [jshell](https://openjdk.java.net/jeps/222)). This is not desired in general.
+
+## Certain kinds of syntaxes
+
+Many languages mandates specialized kinds of syntactic forms in a formal grammar. This makes the evaluation rules complicated than needed.
+
+Overly complicated syntactic forms shall not be mandated in the core language rules. Nor they shall be built-in.
+
+Such syntaxes are more difficult to be consistent with each other, compared to other syntactic rules.
+
+Hard-coded syntaxes rules are also difficult to remember, hence error-prone in nature.
+
+Lacking of such rules allowing the language more easily to achieve *homoiconicity*, leading to a simpler way to represent the code as data.
+
+Note the extent of instances of this subclause can be more subjective than others. See examples for references (still not exhaustive, though).
+
+### Examples
+
+Many lisp dialects have *special forms* which are built-in.
+
+Infix syntaxes are considered overly complicated in general because other forms are sufficient and often more expressive.
+
+* Infix forms are less expressive than both prefix and post forms.
+	* Infix forms can naturally have only 2 groups of positional arguments. Both prefix and postfix forms can have more choices on arity.
+	* Prefix and postfix forms can have powerful inductive rules over a set of arbitrary number of arguments. They are not applicable to infix forms.
+* Instances of infix syntaxes vary.
+	* Many languages have *infix operators*. They are considerably complicated enough to be the example, due to hard-coded rules (in a non-trivial amount) which requires memorization by the users of these languages.
+	* C has infix syntaxes of declarators, which are potentionally confusing. Note the so-called "right-left rule" does not correctly reflect the normative rules defined by the formal syntaxes.
 
 ## Concrete type systems
 
@@ -357,7 +513,7 @@ The typechecking is not allowed overall. It is users' freedom to derive the inva
 
 Although the concrete judgment of qualification is subjective, but clearly, the requirement type system shall at least allow undefined behavior in the most general cases.
 
-In this sense, it should be noted [the bottom type](https://en.wikipedia.org/wiki/Bottom_type) has special meaning on the purpose of the specification. It stands for "unpredictable (by design)" but not necessarily the "crashed" state (like [this](http://okmij.org/ftp/continuations/undelimited.html#introduction)).
+In this sense, it should be noted [the bottom type](https://en.wikipedia.org/wiki/Bottom_type) has special meaning on the purpose of the specification. It stands for "unpredictable (by design)" but not necessarily the "crashed" state (like [this](https://okmij.org/ftp/continuations/undelimited.html#introduction)).
 
 ## Restrictive computability
 
@@ -371,13 +527,27 @@ Such properties may be beneficial or even vital in some problem domains like [au
 
 Note mandatory of such properties usually needs to introduce some sorts of concrete type systems. This is also disallowed by related subclauses above.
 
+### Purity
+
+Purity, or the effort to prevent the expressiveness of impure computational effects, is considered a non-goal in a general-purposed language design.
+
+Impure effects may change the states implicitly. Purity instead prevent them. However, they are still unavoidable in a whole meaning program, because a program without side effects cannot interact with the implementation environment. That is, the user of a program without impure effects can never get the result computed by the program. This implies the existence of program structure semantically equivalent to the impure effects to express the side effects.
+
+Purity guarantees the reasoning of the computations being side-effect free. This eases many analysis, but also makes the users more laborious to express the side effects in other parts of the program in some other unnatural ways (see the counterexamples subclauses below).
+
+For a general-purposed design, no preference to enforce the purely functional style shall be assumed without careful conventions. It is ultimately the freedom of users to determine whether it is necessary to mix the pure and impure parts of the programs in the same language. It is still possible to annotate the specific parts of the program to be pure, if users want that.
+
+Avoiding purity be default is also necessary to composable different effects. See also the rationale of the first-class effects in the previous subclause.
+
 ## Various control primitives
 
-Control effect shall be reified, not by providing more build-in control primitives.
+Most control effects shall be reified, not by providing more build-in control primitives. This enables programmable controls in natural and extensible ways.
+
+Only a few control operator can me really primitive, notably, the branching (i.e. traditional `if`). Although the primitive `if` can be eliminated by adopting the [continuation passing style](https://en.wikipedia.org/wiki/Continuation_passing_style), making every program with branching more verbose than needed (becuase it usually only introduces grammatical noises and difficulties on [separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns) with no practical benefits in this context) is clearly unintentional.
 
 ### Sequential control
 
-Sequential control forms, or *statements*, consist the imperative style of the control of programs. Nevertheless, it is not the fundamental one and it can be derived from primitives in existed calculi with (lambda or vau) *abstraction* constructs. The sequential semantics are essentially buried in the rules about order of applicative function calls, and there is no need to introduce a new special rule specific for this purpose.
+Sequential control forms, or *statements*, consist the imperative style of the control of programs. Nevertheless, it is not the fundamental one and it can be derived from primitives in existed calculi with (lambda or vau) *abstraction* constructs. The sequential semantics is essentially buried in the rules about order of applicative function calls (i.e. *function applications*), and there is no need to introduce a new special rule specific for this purpose.
 
 ### [Exception handling](https://en.wikipedia.org/wiki/Exception_handling)
 
@@ -389,7 +559,7 @@ Native implementations of built-in exception handling may have ABI compatibility
 
 ### Examples
 
-ALGOL-like languages have explicit semicolons (`;`) to provide the sequential control. It can be implicit in some languages (like [ECMAScript](https://www.ecma-international.org/publications/standards/Ecma-262.htm) dialects). 
+ALGOL-like languages have explicit semicolons (`;`) to provide the sequential control. It can be implicit in some languages (like [ECMAScript](https://www.ecma-international.org/publications/standards/Ecma-262.htm) dialects).
 There can be other syntactic contexts for `;` with different meanings, so different replacements are needed (e.g. the `for` statement in C uses `;` for different meanings, and `,` operator is used for sequential effects in the condition clauses). The latter design is inconsistent in nature. C++, Java, C# and more C-like languages share the same design here.
 
 Scheme's [`lambda`](https://schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-7.html#%_sec_4.1.4) expression has built-in sequential control implied by evaluation order among subexpressions in its body. The [`begin` expression expanded from `lambda`](view-source:https://schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-10.html#%_sec_7.3) uses this to express the exact control effect.
@@ -406,29 +576,71 @@ The Kernel language does not rely on sequential control effects in its primitive
 
 Scheme does not have loops in primitive features. It encourages recursion (with mandatory proper tail recursion) instead. Kernel does the exact same.
 
+## Global store
+
+For the purpose of flexibility of a general-purposed language, a single global configuration of memory space (the global store) shall not be mandated. This effectively allows the implementations to provide no global allocation facilities when they are not supposed to be useful, e.g. for devices designed to run programs with fixed memory footprints. Note this does not prevent implementations to provide such interface for compatilibity. Implemantations can also provide opt-in global allocation which always fail.
+
+Moreover, it ensures the remaining design of the language does not rely on the global properties of allocation. This means it can be less problematic to adapt to implementation schemes with constraints about the memory locality, such as [distributing systems](https://en.wikipedia.org/wiki/Distributed_computing), because:
+
+* No global sharing is implied.
+* No global memory consistency is implied.
+
+The constraints in practice are often very coarse and there usually still need to have computing nodes sharing the resources in various concrete designs. Nevertheless, a genuine general-purposed top-level design shall principally avoid the embarassment of overly strong assumptions on the underlying computation model. Ultimately, fighting with [physical laws](https://en.wikipedia.org/wiki/Principle_of_locality) is also far from wise.
+
+### Examples
+
+ISO C has the notion reflecting the status of objects being allocated in the global free store as *allocated storage duration*, whose availablity is provided by specific standard library functions like `malloc`. ISO C allows conforming implementations without such library functions. Thus, the allocated storage duration is not mandated.
+
 ## [GC](https://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29)
 
 See discussions in the subclause about necessity of deterministic deallocation above. This directly disallows relying on [tracing GC](https://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29#Tracing).
 
-GC also effectively encourages blur on object *ownership* and *access rights*, and further avoids using first-class objects as abstraction of resources whose relations of ownership can be naturally expressed as [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph)s by succinct use of [RAII](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) idiom. Note in such cases, [cyclic references with equal ownership](https://en.wikipedia.org/wiki/Memory_leak#Reference_counting_and_cyclic_references) should be in general avoided by external owners or [weak references](https://en.wikipedia.org/wiki/Weak_reference). Someone may argue [this discipline harms idiomatic recursion use of closures](http://lambda-the-ultimate.org/node/5007#comment-81721), but the right of ignorance of ownership actually does not exist in nature: either it has to be managed by external owners implicitly (like a GC), or it has to be done explicitly. GC has indeed nothing to do with [closures](https://en.wikipedia.org/wiki/Closure_%28computer_programming%29) for historical reasons without the concrete background of some specific languages (which may sometimes imply the GC is always used). The so-called [funarg problem](https://en.wikipedia.org/wiki/Funarg_problem) can be resolved without aid of GC after the clarification of object ownership. (Actually, GC is the special case that uses the external owner.)
+GC also effectively encourages confusions on several important properties of objects.
+
+* It blurs the *ownership* and *access rights* of objects.
+* It makes the *lifetime* of objects overly implicit.
+	* The notion is important because it determines the identity of the live instance of the objects, which can make differences on program behavior.
+	* When the differences are sensible, the Lispy terminology *extent* should not be used instead.
+		* For example, a first-class continuation may have an minimal extent determined by the call graph before its capture, which is not necessarily same to its lifetime. It is the lifetime but not the extent to determine the necessary timing of the allocation of the deallocation for the object.
+* It further avoids using first-class objects as abstraction of resources whose relations of ownership can be naturally expressed as [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph)s by succinct use of [RAII](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) idiom.
+	* In such cases, [cyclic references with equal ownership](https://en.wikipedia.org/wiki/Memory_leak#Reference_counting_and_cyclic_references) should be in general avoided by external owners or [weak references](https://en.wikipedia.org/wiki/Weak_reference).
+	* Someone may argue [this discipline harms idiomatic recursion use of closures](http://lambda-the-ultimate.org/node/5007#comment-81721), but the right of ignorance of ownership actually does not exist in nature: either it has to be managed by external owners implicitly (like a GC), or it has to be done explicitly.
+	* GC has indeed nothing to do with [closures](https://en.wikipedia.org/wiki/Closure_%28computer_programming%29) for historical reasons without the concrete background of some specific languages (which may sometimes imply the GC is always used).
+		* The so-called [funarg problem](https://en.wikipedia.org/wiki/Funarg_problem) can be resolved without aid of GC after the clarification of object ownership. (Actually, GC is the special case that uses the external owner.)
+
+Moreover, GC interferes the extensibility of the language rules.
+
+* Once the (global) GC implied by the language rules and it is in use, it is almost impossible to opt-out.
+	* Due to the nature of nondeterminism, it is generally impossible to prove that no resources is owned by the global instance in any non-trivial programs.
+* However, if the mandated GC is composed by multiple instances of collectors backed by separated stores, it is not *that* bad.
+	* This is essentially a set of *pools* of memory, which is not the typical case discussed here.
+	* Nevertheless, explicit pools exposed in the object language are preferred to these implicit instances.
 
 There are other implementation concerns to avoid general-purposed GC by default.
 
-* Notably, GC often incurs memory consumption problem, that is, requiring [a lot more backing memory than the amount being needed](https://sealedabstract.com/rants/why-mobile-web-apps-are-slow/index.html).
-	* Note this is actually the instance identified by "leak" as per the definition of [[Cl98]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.8567&rep=rep1&type=pdf), being stricter worse than deterministic release of memory in block scope variables of ALGOL-like languages.
-	* This increases the risk of [page faults](https://en.wikipedia.org/wiki/Page_fault) in modern systems, which is even worse for performance.
-* Many GC incurs the [STW (stop-the-world)](https://en.wikipedia.org/wiki/Tracing_garbage_collection#Stop-the-world_vs._incremental_vs._concurrent) problem. This can seriously degenerate responsibility of applications by poor latency and causes bad user experience in cases of interactive applications.
+* Most typical GC implementations have allocators directly relying on a single global store.
+	* This already conflicts with the requirements of avoiding mandatory of the global store described in the related subclause.
+	* Consequently, deriving a language without GC in user programs is generally impossible. This conflicts with the requirements of general-purposed property (at least to the configurations which cannot afford the overhead of the global store).
+* Notably, GC often incurs memory consumption problem even with a robust global store. That is, requiring [a lot more backing memory than the amount being needed](https://sealedabstract.com/rants/why-mobile-web-apps-are-slow/index.html).
+	* Note this is actually a kind of "leak" as per the definition of [[Cl98]](https://www.researchgate.net/profile/William_Clinger/publication/2728133_Proper_Tail_Recursion_and_Space_Efficiency/links/02e7e53624927461c8000000/Proper-Tail-Recursion-and-Space-Efficiency.pdf), being stricter worse than deterministic release of memory in block scope variables of ALGOL-like languages.
+	* This increases the risks of [page faults](https://en.wikipedia.org/wiki/Page_fault) in modern systems, which is even worse for performance.
+* Many GC incurs the STW (stop-the-world) problem (mentioned previously). This can seriously degenerate responsibility of applications by poor latency and causes bad user experience in cases of interactive applications.
 	* Generational or incremental GC may relieve the problem, but not totally avoid. And the complexity of GC implementation can increase a lot.
 	* Most concurrent GC implementations have no better situations except that the stop time would be less. But the complexity can be even more.
 	* The [C4](https://www.azul.com/files/c4_paper_acm2.pdf) claims it can totally avoid the stop. However, it is only meaningfully available on a system equipped with huge amount of memory (say, several TBs in one instance).
-* These performance problems make it not suited for most real-time or low-latency applications. Although in theory GC is not necessarily inconsistent with these requirements, it is already quite hard to implement. With limited memory resources, this is even harder.
-* Some languages with need of "system programming" like C, C++ and Rust avoid GC by default. In particular, (general-purposed) GC violates [zero overhead](https://webstore.iec.ch/preview/info_isoiec18015{ed1.0}en.pdf) principle in C++, and similarly, [zero overhead abstraction](https://blog.rust-lang.org/2015/05/11/traits.html) in Rust.
+* These performance problems make it not suited for most real-time or low-latency applications.
+	* Although in theory GC is not necessarily inconsistent with these requirements, it is already quite hard to implement. With limited memory resources, this is even harder.
+* Some languages with need of "system programming" like C, C++ and Rust avoid GC by default.
+	* In particular, (general-purposed) GC violates [zero overhead](https://webstore.iec.ch/preview/info_isoiec18015{ed1.0}en.pdf) principle in C++, and similarly, [zero overhead abstraction](https://blog.rust-lang.org/2015/05/11/traits.html) in Rust.
+* By relying on more assumptions of the underlying implementation, a so-called [conservative GC](https://en.wikipedia.org/wiki/Tracing_garbage_collection#Precise_vs._conservative_and_internal_pointers) can perform better than a so-called precise GC, at the cost of less portability.
+	* In particular, a conservation GC can sometimes [perform better with the knowledge of the underlying layout of the activation records](https://github.com/justinethier/cyclone/raw/master/docs/research-papers/CheneyMTA.pdf).
+	* This strategy in practice may incur higher risks on portability in the evolution towards optimal resource management implementations because less fallbacks can be easily integrated back into the language designs without clashes.
 
 Note the discouragement of GC does not cover the following facilities.
 
 * Specific resource management schemes sharing some properties with GC, like resource pools (esp. [memory pools](https://en.wikipedia.org/wiki/Memory_pool)), are recommended as the replacement of GC for specific resource usage patterns.
-* Transformations based on analysis of resources usage include [escape analysis](https://en.wikipedia.org/wiki/Escape_analysis) and [region inference](https://en.wikipedia.org/wiki/Region-based_memory_management#Region_inference) (sometimes referred as the _static GC_).
-* Deterministic local collectors can be used to suppress leaks further than ALGOL-like block structures (see [[Cl98]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.8567&rep=rep1&type=pdf)), including the case of implementation of TCO without GC. 
+* Transformations based on analysis of resources usage include [escape analysis](https://en.wikipedia.org/wiki/Escape_analysis) and [region inference](https://en.wikipedia.org/wiki/Region-based_memory_management#Region_inference) (sometimes referred as the *static GC*).
+* Deterministic local collectors can be used to suppress leaks further than ALGOL-like block structures (see [[Cl98]](https://www.researchgate.net/profile/William_Clinger/publication/2728133_Proper_Tail_Recursion_and_Space_Efficiency/links/02e7e53624927461c8000000/Proper-Tail-Recursion-and-Space-Efficiency.pdf)), including the case of implementation of TCO without GC.
 
 ## [ABI](https://en.wikipedia.org/wiki/Application_binary_interface) dependency
 
@@ -454,11 +666,11 @@ However, it does not work in general without [leaks abstraction](https://en.wiki
 
 ### Examples
 
-D [assumes flat memory spaces with specified machine width](https://dlang.org/overview.html#features_to_drop).
+D [assumes flat memory spaces with some specified machine width](https://dlang.org/overview.html#features_to_drop).
 
 ### Counterexamples
 
-Both ISO C and ISO C++ lack specified ABI specification within the language rules. Only limited *linkage* support is mandated by C++. However, users may believe the false illusion that "C has defined ABI" and "C++ does not". This is perhaps caused by various reasons.
+Both ISO C and ISO C++ lack specified ABI specifications within the language rules. Only limited *linkage* support is mandated by C++. However, users may believe the false illusion that "C has defined ABI" and "C++ does not". This is perhaps caused by various reasons.
 
 * Implementations of C are often treated as the *de-facto standard*.
 	* Historically, C was targeting ISA-level "native" platforms. This is still true in most modern implementations.
@@ -472,7 +684,7 @@ Both ISO C and ISO C++ lack specified ABI specification within the language rule
 		* Overloading and namespaces are usually supported by [name mangling](https://en.wikipedia.org/wiki/Name_mangling) on symbols in binary file formats. Implementation of C also uses similar (but almost always simpler) strategy in practice, but this is not mandated by the language specification.
 		* ISO C++ does mandate more than ISO C, including the language support library within the standard library required by core language features (for support of exception handling, [RTTI](https://en.wikipedia.org/wiki/RTTI) and so on). These specifications make the runtime library is not avoidable in a complete conforming implementation in practice. The additional parts are usually strictly more complicated than libc and are often the reasons of binary incompatibility besides name mangling.
 		* These additional complexities may be worth having a standalone ABI specification like Itanium C++ ABI. Nevertheless, compatibility is still limited among different versions of the ABI specification, depending on feature addition of targeted versions of ISO C++.
-	* ISO C++ did attempt to address underlying ABI issues, e.g. allocator pointers compatible to [both near and far pointers](https://en.wikipedia.org/wiki/Intel_Memory_Model#Pointer_sizes), but the effect was suspicious. On the contrary, ISO C does not do so, although there are separated technical reports like [ISO TR18037](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1169.pdf), which are far less well-known.
+	* ISO C++ did attempt to address underlying ABI issues, e.g. allocator pointers compatible to [both near and far pointers](https://en.wikipedia.org/wiki/Intel_Memory_Model#Pointer_sizes), but the effect was suspicious. On the contrary, ISO C does not do so, although there are separated technical reports like [ISO TR18037](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1169.pdf), which are far less well-known.
 
 ## [Metaprogramming](https://en.wikipedia.org/wiki/Metaprogramming)
 
@@ -480,13 +692,13 @@ Metaprogramming is the programming mechanism and technique to manipulate a progr
 
 * Program transformers: in the general sense, this includes translators as the most implementations of programming language.
 * [Generative programming](https://en.wikipedia.org/wiki/Automatic_programming#Generative_programming): automatically generation of the program code.
-* Metaprogramming allows similar programming techniques used among different phases with more or less shared (or even the exact same) forms of the language constructs, rendering that only a quite small set of core features is need and *would* be supported by the same language.
+* Metaprogramming allows similar programming techniques used among different phases with more or less shared (or even the exact same) forms of the language constructs, rendering that only a quite small set of core features is needed and *would* be supported by the same language.
 	* This approach benefits greatly both generality and simplicity at the same time.
-	* It makes learning the language features easier by promoting the coherence of the relationship between general purposes and general features. It also improves the utility of the efforts of learning, because the features can be heavily reused in a natural and uniform way.
+	* It has better smoothness (c.f. the smoothness conjecture) in the base design.
 	* With given benefits above, it is hardly feasible to be replaced by other means.
 	* Nevertheless, not all styles of metaprogramming share these properties. Namely, it *can*, but not *must*, have the benefits. The fact suggests that such benefits are from some more basic elements of the language design, but not by the allowance of metaprogramming itself.
 
-While the purpose is plausible, it is not the feature that a general language to support directly. The various implementation techniques (see below) can be broken down into more fundamental feature sets. They are hereby basically superseded by explicit `eval` style code of vau abstractions with more consistent rules for several reasons.
+While the purpose is plausible, it is not the feature that a general-purposed language need to support directly. The various implementation techniques (see below) can be broken down into more fundamental feature sets. They are hereby basically superseded by explicit `eval` style code of vau abstractions with more consistent rules for several reasons.
 
 * The computational expressiveness is guaranteed by formal models (at least compared to macros). (Note [macros solely in C-like preprocessor itself is not Turing-complete](https://stackoverflow.com/questions/3136686/is-the-c99-preprocessor-turing-complete)).
 * This approach also avoids need of predefined multiple phases of translation.
@@ -497,7 +709,7 @@ While the purpose is plausible, it is not the feature that a general language to
 
 [Macros](https://en.wikipedia.org/wiki/Metaprogramming#Macro_systems) are traditionally used to implement reflective features. They share similar pros and cons. See the specific subclauses below.
 
-[Metaclasses](https://en.wikipedia.org/wiki/Metaclass) are generative reflection facilities which are also [proposed for C++]([http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0707r3.pdf]).
+[Metaclasses](https://en.wikipedia.org/wiki/Metaclass) are generative reflection facilities which are also [proposed for C++]([https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0707r3.pdf]).
 
 C++ templates are hacked to support some of reflective features like introspection. The abused [template metaprogramming](https://en.wikipedia.org/wiki/Template_metaprogramming) techniques are also studied and introduced by design in languages like D.
 
@@ -541,24 +753,23 @@ Macros without hygiene are not safe nor efficient to be used by default. It shou
 
 ## Namespace separation
 
-The namespace separation of values is the design to distinguish a term denotes callable entities (*functions*, or *combiners* in vau-calculi parlance) from others.
+The namespace separation of values is the design to distinguish a term denoting callable entities (*functions*, or *combiners* in vau-calculi parlance) from others.
 
-This perhaps first well-known by Lisp communities with [the article about *function cells* and *value cells*](http://www.nhplace.com/kent/Papers/Technical-Issues.html). It is interested because functions used as a significant kind of first-class entities are concerned particularly by Lisp dialects and they involve very different looks in resulted idiomatic code. The separation is called "Lisp-2" for the purpose, and the remained dialects are instances of "Lisp-1".
+This is perhaps first well-known by Lisp communities (see [the article about *function cells* and *value cells*](https://www.nhplace.com/kent/Papers/Technical-Issues.html)). It is interested because functions used as a significant kind of first-class entities are concerned particularly by some Lisp dialects and different designs involve very different looks in the resulted idiomatic code. The resulted dialects with the separation is called "Lisp-2", in contrast to the remained "Lisp-1" ones.
 
-Note the term "namespace" is not a language-supported entity here, but a mechanism in *name resolution*. The etymology is still plausible, though. See discussion about terminology below.
+Note the term "namespace" is not a language-supported entity here, but a mechanism in *name resolution*. The etymology is still plausible, though. See the discussion about terminology below.
 
-Separation of namespaces is better avoided for the general-purposed language design at least for 3 different reasons:
+Separation of namespaces is better avoided for the general-purposed language design. There are at least 3 different reasons of this policy:
 
-* It simplifies the language rules in the specification about name resolution.
+* It simplifies language rules in the specification about name resolution.
 * It simplifies interactions with first-class functions used in the code.
-* It avoids needlessly confusion between duplicate names in same scope.
+* It avoids needlessly confusion between duplicate names in the same scope.
 
 ### Terminology
 
-It is argued that ["Lisp-1" and "Lisp-2" are bad jargons](http://ergoemacs.org/emacs/lisp1_vs_lisp2.html). This is sometimes inappropriate.
+It is argued that ["Lisp-1" and "Lisp-2" are bad jargons](http://xahlee.info/emacs/emacs/lisp1_vs_lisp2.html). This is sometimes inappropriate.
 
-> “lisp-2” should be called multi-value-namespace languages.
-
+> “lisp-2” should be called multi-value-namespace languages.\
 > “lisp-1” should be called single-value-namespace languages.
 
 This is good and even better for non-Lisp languages, but lengthy. The "value" is also a source of imprecision when it is defined differently in the object languages.
@@ -581,23 +792,85 @@ This is technically wrong because there are Lisp derivations neither dialects of
 
 This is true. However, there seems no better replacements in general, besides the Lisp-specific "cells", which is technically not even in the language specifications but left as implementation details. The variant of term "namespace" is also used out of Lisp dialects, see the subclause about ISO C below. (Also note [Racket uses its namespaces to implement environments](https://docs.racket-lang.org/inside/im_env.html), which may be more proper usage of the original meaning.)
 
+### Number of namespaces
+
+As noted in [the article](https://www.nhplace.com/kent/Papers/Technical-Issues.html), there can be more than 2 namespaces. But this is less irrelavant here, because cases of more than 1 namespaces also suffer from issues of Lisp-2 in general.
+
+Instead, the mentioned nature for multiple namespaces holding "additional meanings associated symbols" are actually popular if the difference of notations are uninterested. That is, it is just the *metadata*. Whether the metadata is stored in one more cells or many more cells are also less interested by the language design, because it can be addressed by the transformation in the implementation, as pure details, say, the IR (immediate representation) in a compiler. Given that there can be more than one IRs in different phases of translation, this is even less interesting fix up the concrete numbers of cells in the language design.
+
+Actually there is at least one notable and popular kind of metadata: the (dynamic) type. However, this is not specific to symbols, but potentionally all objects in the language. Types can considerably carry more information than the separation of namespaces in more flexible ways. In particular, [overloading, as a kind of ad-hoc polymorphism](https://www.semanticscholar.org/paper/Fundamental-Concepts-in-Programming-Languages-Strachey/a4411c83fd89ffc81a1fe148b09a148f1dbf0ca8), can have effects of separation of functions and non-function variables on the resulted code. It just does not require the fixed rules on notations. With types, there can be arbitrary many kind of "cells" instead of namespaces having equivalent effects here. The same restriction of [abandoning η-reduction](#impure-lambda-calculi-based) also have effects here as in traditional Lisp-2 languages, though.
+
+After all, why would one care about the metadata of symbols if it is not specific the the evaluation rules specific to them? And besides the tricks of notations, why screw up with the evaluation rules, esp. there are alternatives (metadata) doing better in general?
+
 ### Examples
 
-ISO C has different *name spaces* (be careful, there is a space in the term) for *identifiers*. This does not cause Lisp-1 vs. Lisp-2 concerns because C does not have first-class functions. However, the complexity of rules is still existed, and the duplication of names may still likely introduce confusion if not carefully used. Declarations like `typedef struct name {...} name;` are often used to render the omission of `struct` allowed, but it is hard to tell readers whether or which is intentional by the code (depending on the attitude to [TIMTOWTDI](https://en.wikipedia.org/wiki/There's_more_than_one_way_to_do_it)), undermining the consistency of codeing styles.
+ISO C has different *name spaces* (be careful, there is a space in the term) for *identifiers*. This does not cause Lisp-1 vs. Lisp-2 concerns because C does not have first-class functions. However, the complexity of rules still exist, and the duplication of names may still likely introduce confusion if not carefully used. Declarations like `typedef struct name {...} name;` are often used to render the omission of `struct` allowed, but it is hard to tell readers whether or which is intentional by the code (depending on the attitude to [TIMTOWTDI](https://en.wikipedia.org/wiki/There's_more_than_one_way_to_do_it)), undermining the consistency of coding styles.
 
 ISO C++ merges *type-specifier* name separation by default but allowing exceptional cases via *elaborated-type-specifier* syntactic elements in a semi-compatible way to C, albeit with more complicated rules. This makes some code simpler (without need of `typedef`s) and reduces possible metaprogramming issues on type specifiers, although the complicated rules may lead to defects like [this](https://wg21.cmeerw.net/cwg/issue95). In all, the language itself is equipped with separation rules, but intentionally pretended to be a single-namespace one.
+
+From the point of merging the functions and non-function variables, [C and C++ are Lisp-1, as illustrated in the mentioned article above](http://xahlee.info/emacs/emacs/lisp1_vs_lisp2.html). However, the complexity of dealing with tags (which are not names of entities) still varies. With the default style of C, it is more like Lisp-2 because `X` and `struct X` are different if there is no declarations like `typedef struct X X;`. On the other hand, C++ is more like ordinary Lisp-1 here. And given that there are kind of tags (say, `union`), there can be Lisp-3 or more in similar languages.
 
 ## Module systems
 
 Module systems are useful in organizing modular code components consistently. However, they can be derived from primitive constructs as libraries.
 
-The way of derivation is considered superior than built-in primitive features for various reasons. The general reasons of primitives vs. derivations are all suited here.
+The way of derivation is considered superior than built-in primitive features for various reasons:
 
-Avoiding module systems out of the language rules also prevents some confusions about the concept itself. As the result of *modularized* designs, modules can have different granularity. For example, a translation unit can be a module, as well as a function in it. Typically, modules with different granularity coexist in a program. There is no good reason to only name one of them as the language feature and reject others. (This point is also true for avoiding the name of "interface" as a language feature as it is in Java and C#.)
+* The general reasons of primitives vs. derivations are all suited here.
+	* There are different designs with different kinds of features. None can definitely meet all requirments.
+		* As a result of adapting to different needs, module systems are often complex in practice.
+		* In particular, the built-in ones in many languages tend to have a rich set of pre-built features, rather than being simple and extensible at first.
+		* This seems quite bad compared to other parts of a general-purposed language design.
+	* Testing different styles of module system designs with derivations have less risks to break the whole language design.
+* Avoiding module systems out of the language rules also prevents some confusions about the concept itself.
+	* As the result of [*modularized* designs](https://en.wikipedia.org/wiki/Modular_design), modules can have different granularities.
+		* For example, a translation unit, as well as a function in it, can be a module.
+	* Typically, modules with different granularities coexist in a program. Choice to a specific granularity over others often depends on contexts.
+		* There is no good reason to only name one of them as the language feature and reject others.
+	* This point is also true for avoiding the name of "interface" as a name of language feature (as in Java and C#).
 
-For the case specific to the module systems, derivations are also allowed to be used as basic building blocks of more abstracted high-level facilities for engineering purpose (e.g. [building systems](https://en.wikipedia.org/wiki/Build_automation) and [CI (continuous integration)](https://en.wikipedia.org/wiki/Continuous_integration). A single fixed design of modules without multi-level reflective derivations in mind is hardly convincingly support the ideas well in general.
+For cases specific to module systems, derivations can be used as the basic building blocks of more abstracted high-level facilities for engineering purpose (e.g. [building systems](https://en.wikipedia.org/wiki/Build_automation) and [CI (continuous integration)](https://en.wikipedia.org/wiki/Continuous_integration). A single fixed design of modules without multi-level reflective derivations in mind can hardly convincingly support the ideas well in general.
 
-(Rationale and examples TBD.)
+(More rationale and examples TBD.)
+
+### Examples
+
+Standard ML provides a [module system](https://en.wikipedia.org/wiki/Standard_ML#Module_system). It is [well-teached](https://courses.cs.washington.edu/courses/cse341/04wi/lectures/09-ml-modules.html), and believed [not difficult to grasp](https://www.classes.cs.uchicago.edu/archive/2005/winter/33600-1/docs/Tofte_modules_tutorial.pdf). While the purpose and experiences are plausible, none of the core problems mentioned above are really addressed, and it certainly does not able to meet all requirements about modules the users may expect (e.g. interaction with the build system to make some metaprogramming stuff during configuration phases). Once the language needs further evolution to include these missing features, there is no easy chance to replace it to a better system without massive reconsideration of the design (e.g. to prove the change will not break the existing code). Namely, the module system itself is still not modularized enough to meed some complex needs in reality.
+
+C++ modules (since ISO C\++20) is a mess. There are mutiple serious problems:
+
+* None of the core problems above are addressed.
+	* Notably, the design is known incomplete as of ISO C++20.
+		* Later standard versions (since ISO C++23) will improve the design, but this implies more uncertainty and difficulties of adoption for real projects which has strict requirements to pin the standard (or even toolchain) versions.
+* Far worse (than the case in standard ML, at least), the design make the language rules complicated a lot, with little sense in the availabity of language features or the improvement of the experience of modularization works.
+	* The complexity is baked into the core language rules.
+		* This even affects users with no interest in C++ modules (but just the language standards since ISO C++20).
+	* There are no benefits like first-classness in modules in SML.
+	* The major improvement over the traditional headers and source translation units are the potentially improved implementation efficiency of translation, rather than the effectiveness on modularization itself.
+		* With the compatibility problems in mind, it even does not making the activities of producing and using modules easier.
+* Transition from code not using C++ modules to code using C++ modules is (likely) not that easy and beneficial.
+	* The decision of introducing C++ modules in a concrete project is usually one-way.
+		* Once it is added to an existing project, there comes the inconsistency of different components in it.
+		* That is, the project manager must be aware of the risks of inconsist transition state. It may imply unexpected bugs and cost.
+	* There exist certain cases not technically feasible to opt-in C++ modules.
+		* Notably, every C modules used in a C++ project cannot opt-in C++ modules, simply because C++ modules are not supported in C.
+		* Each component needs to work with previous versions of C++ can not be changed in-place.
+			* Vendering may be not worthing.
+			* Adding additional conditional inclusion path into such components can work, but costly in general.
+			* Even if the decision of the change is already made, it is often questionable about how much sense to opt-in C++ modules support before it is popular enough.
+	* New projects are generally encouraged to use C++ modules. But the acceptance is still doubtful.
+		* The implementations are not popular enough. The availability and usability are generally in doubt.
+			* Using of C++ modules will undermine one of the most competitive pros of C++: portability.
+		* There are bugs in implementations preventing it being popular.
+			* For example, Microsoft VC++, as one of the most complete implementation, enables its standard module implementation by default. However, this [has broken certain projects](https://stackoverflow.com/questions/76055294). The workaround is disabling it.
+* Although using of C++ modules is optional (i.e. the traditional way without C++ modules can still work in ISO C++20), there is no easy way to rule it out.
+	* Mixture of code using C++ modules and code not using C++ modules are expected to work because of the need of compatibility. This makes some interoperability issues inside the language rules.
+	* This is also true for implemenations. There are potentionally bugs of tools. Some are known (see the example of implementations below). There may be more.
+	* Mixture of code can be a longterm problems in the whole C++ ecosystem.
+		* Given the technically infeasibility and the doubts to opt-in C++ modules, the mainstream adoption may be late, compared to other languages.
+		* Build tools are developed together with the module system. They are lagged.
+		* Not everyone can afford the overhead of the mixture.
+		* The result is more fragmentation, in the aspects of both the community and the availablity of library resources.
 
 ## Concrete arithmetic systems
 
@@ -610,7 +883,7 @@ For the case specific to the module systems, derivations are also allowed to be 
 		* Further, [Gödel's second incompleteness theorem](https://en.wikipedia.org/wiki/G%C3%B6del's_incompleteness_theorems#Second_incompleteness_theorem) shows that such formal systems cannot formalize a consistency proof to themselves on the meta level.
 * The system providing arithmetic operations should not be mandated as primitives in the core language.
 	* Despite the logical problems above, arithmetic systems have different difficulties on computation. No one is the choice fit to all problem domains, particularly when efficiency is taken into account.
-	* Explicit encoding based on the calculi (e.g. [Church numerals](https://en.wikipedia.org/wiki/Church_encoding) encoded in lambda calculi) are general in inefficient. The [computational complexity], both in time, space and determinism, are poor for most practical use cases. So, such encodings are never enough. Although there can be mapping between the entities in such model and external entities of numbers, it is still suspicious to be worthy for a general-purposed language.
+	* Explicit external encoding schemes based on the calculi (e.g. [Church numerals](https://en.wikipedia.org/wiki/Church_encoding) encoded in lambda calculi) are generally inefficient. The [computational complexity](https://en.wikipedia.org/wiki/Computational_complexity), both in time and space, are significantly poor for most practical use cases, and there is less determinism to estimate the range of the cost. So, such encodings are never enough. Although there can be mapping between the entities in such model and external entities such as numbers, it is still suspicious worth doing so in a general-purposed language.
 	* All other existing methods to implement them involve independent disciplines of internal encoding schemes (e.g. [floating-point arithmetic](https://en.wikipedia.org/wiki/Floating-point_arithmetic)).
 		* Such disciplines expose many different concrete properties not needed by the problem domains (e.g. hard-coded representable numerical boundary and precision limitations) , which needs to be worked around further.
 		* An improper model of numbers may introduce too many unnecessary dependencies difficult to correctly abstract away.
@@ -624,13 +897,14 @@ For the case specific to the module systems, derivations are also allowed to be 
 
 For arithmetic systems not in the core language, some points above are still suited. The [numerical tower](https://en.wikipedia.org/wiki/Numerical_tower) is suggested here to be the prototype for general-purposed practical use, as it avoids most shortcomings of the computational concerns.
 
+<!-- markdownlint-disable-next-line MD026 -->
 # Why not ...
 
-Here are some examples to illustrate how existing languages is not satisfying for the requirements. Each one should have one or more pros to be endorsed.
+Here are some examples to illustrate how existing languages fail to satisfy the requirements. Each one should have one or more pros to be endorsed.
 
 ## A brief list of requirements
 
-The following list are properties a needed language shall meet. Some languages superseded by them are also explicitly listed.
+The following list contains a (non-exhaustive) list of properties a language conforming to this document shall meet. Some languages excluded ("superseded") by them are also explicitly listed.
 
 * (A) The language has a specification independently to the implementations. This makes it supersedes many toy languages.
 	* (A.1) Further, the specification is normative. This makes it supersedes many "scripting languages".
@@ -638,7 +912,7 @@ The following list are properties a needed language shall meet. Some languages s
 		* (A.2.1) Further, the language allows a free form grammar which makes the leading whitespaces insignificant in its lexical (source) form. This makes it supersedes languages like Python and Haskell.
 		* (A.2.2) Further, the language allows identification of a well-defined context-free set from the rules, namely the syntactic grammar. This makes it supersedes ISO C (for context-sensitive *declarator* syntaxes) and ISO C++ (like ISO C and more on vexing parse).
 	* (A.3) Further, the specification has a formal model to specify its semantics. This makes it supersedes most languages other than some Lisp dialects.
-	* (A.4) Further, the specification of the program in the language is free from concrete translation forms. This makes it supersedes languages like Java (explicitly mandatory of bytecode "compiled to" the input of JVM) and PicoLisp. 
+	* (A.4) Further, the specification of the program in the language is free from concrete translation forms. This makes it supersedes languages like Java (explicitly mandatory of bytecode "compiled to" the input of JVM) and PicoLisp.
 * (B) The language allows variables and procedural abstraction. This makes it supersedes languages like Brainfuck and Unlambda.
 	* (B.1) Further, the language uses lexical scoping by default. This makes it supersedes to languages using dynamic scoping like PicoLisp and Emacs Lisp.
 	* (B.2) Further, the language guarantees proper tail calls. This makes it supersedes to some languages impossible to implement it practically (like Java). This also makes it supersedes most other languages which do not mandate it (most languages other than R<sup>n</sup>RS Scheme, Kernel and a few more).

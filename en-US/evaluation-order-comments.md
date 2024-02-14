@@ -1,6 +1,6 @@
 ﻿# Some comments on refining expression evaluation order of C++
 
-Quoted text are from the referenced material: [P0145R1](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0145r1.pdf).
+Quoted text are from the referenced material: [P0145R1](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0145r1.pdf).
 
 ## 1 Introduction
 
@@ -8,29 +8,30 @@ Quoted text are from the referenced material: [P0145R1](http://www.open-std.org/
 
 Suspectable. Because ...
 
-> In a nutshell, given an expression such as `f(a, b, c)`, the order in which the 
-sub-expressions `f`, `a`, `b`, `c` (which are of arbitrary shapes) are evaluated is left  unspecified by the standard. If any two of these sub-expressions happen to modify the same object without intervening sequence points, the behavior of the program is undefined.
-For instance, the expression `f(i++, i)` where `i` is an integer variable leads to undefined behavior, as does `v[i] = i++`.
+> In a nutshell, given an expression such as `f(a, b, c)`, the order in which the sub-expressions `f`, `a`, `b`, `c` (which are of arbitrary shapes) are evaluated is left  unspecified by the standard. If any two of these sub-expressions happen to modify the same object without intervening sequence points, the behavior of the program is undefined.\
+> For instance, the expression `f(i++, i)` where `i` is an integer variable leads to undefined behavior, as does `v[i] = i++`.
 
 The current rules are already somewhat clear (compared with the proposed rules) and not hard to recite. It seems that there are few people willing spending time on this topic continuously. Novices usually do not try to change the core language rules, and seasoned users usually do not bother to do too much beyond setting up the convention to follow the standard.
 
 > Even when the behavior is not undefined, the result of evaluating an expression can still be anybody’s guess.  Consider the following program fragment:
-```
-#include <map>
-int main() {
-	std::map<int, int> m;
-	m[0] = m.size(); // #1
-}
-```
-What should the map object `m` look like after evaluation of the statement marked #1? `{{0, 0}}` or `{{0, 1}}` ?
+>
+>```cpp
+>#include <map>
+>int main() {
+>	std::map<int, int> m;
+>	m[0] = m.size(); // #1
+>}
+>```
+>
+> What should the map object `m` look like after evaluation of the statement marked #1? `{{0, 0}}` or `{{0, 1}}` ?
 
-It should be clear without guess because every time the reader meet `=`, he should trace the dependencies (including evaluation order) trivially in a few milliseconds. Since [CWG222](http://wg21.cmeerw.net/cwg/issue222) is resolved, it should be safe to merge the parsing and tracing passes in one's brain for both overloaded and builtin `=` as long as the left side operand has no insane subexpressions screwing up the value dependencies, which should be easy to keep (away from abuse of macros and "properties", etc). Here the effect of `=` is up to the values of operands uniquely. Note the fragment is *not* the case like `m[m[0] = m.size()] = m.size();`. On the other hand, will it be a problem in practice? Just *do not write obviouosly stupid unreadable code*.
+It should be clear without guess because every time the reader meet `=`, he should trace the dependencies (including evaluation order) trivially in a few milliseconds. Since [CWG222](https://wg21.cmeerw.net/cwg/issue222) is resolved, it should be safe to merge the parsing and tracing passes in one's brain for both overloaded and builtin `=` as long as the left side operand has no insane subexpressions screwing up the value dependencies, which should be easy to keep (away from abuse of macros and "properties", etc). Here the effect of `=` is up to the values of operands uniquely. Note the fragment is *not* the case like `m[m[0] = m.size()] = m.size();`. On the other hand, will it be a problem in practice? Just *do not write obviouosly stupid unreadable code*.
 
 If it is still indeed annoying for someone, then C-like languages are likely not suitable, please try Lisp-like dialects without such overhead of dealing with infix expressions instead.
 
 ## 2 A Corroding Problem
 
-> The traps aren’t just for novices or the careless programmer. 
+> The traps aren’t just for novices or the careless programmer.
 
 Not exactly. If one does not know why these fundamental rules are important and why ignorance of them is dangerous, he *is* a novice. If one has no idea to avoid it, he *is* a novice. If one cannot force *himself* to obey the convention to prevent such trap, he *is* careless. The remained problem is how to enforce *others* following the convention, but that is another story.
 
@@ -62,7 +63,7 @@ Questionable. What support can the language provide? How? There are many "contem
 
 A more apporiate statement can be: the language should *allow* contemporary idioms, and *encourage* them when there are no obvious defects and superior replacements.
 
-> For example, using `<<` as insertion operator into a stream is now an elementary idiom.  
+> For example, using `<<` as insertion operator into a stream is now an elementary idiom.
 
 False. Using `<<` as insertion operator into a stream is only idiomatic for *formatted insertion* of *standard stream classes* and similarly designed classes, and actually not so *elementary* because it is somewhat domain-specific and less dependent by widely spreaded higher-level usage.
 
@@ -80,8 +81,7 @@ Since such idioms are not unique, the guarantee is not needed urgently.
 
 Still usable without chaining.
 
-> Without the guarantee that the obvious order of evaluation for function call and member  selection is obeyed, these facilities become traps, source of obscure, hard to track bugs
-, facile opportunities for vulnerabilities.
+> Without the guarantee that the obvious order of evaluation for function call and member  selection is obeyed, these facilities become traps, source of obscure, hard to track bugs, facile opportunities for vulnerabilities.
 
 Then forbid such use by fixing the interface, if teaching the correct idiom is too cumbersome.
 
@@ -89,7 +89,7 @@ Then forbid such use by fixing the interface, if teaching the correct idiom is t
 
 Only with a clear design and a clean clue in user's mind to reason why (or not) he should take the idiomatic way.
 
-> The changes suggested below are conservative, pragmatic, with one overriding guiding principle: **effective support for idiomatic C++**. 
+> The changes suggested below are conservative, pragmatic, with one overriding guiding principle: **effective support for idiomatic C++**.
 
 Actually they are not conservative because they changed the expression semantics so broadly (though the meaning and the behavior of the programs may keep the same); also not so pragmatic because of the limitation of the idioms they supported.
 
@@ -106,7 +106,7 @@ This is also methodologically questionable. It seems that "to support of member 
 
 This is probably not feasible, because as different compliers do, different human users may also *always* read and write differently, e.g. to assume and depend on the left-to-right order as possible vs. to assume indeterminate evluation and to depend on explicit sequenced ordering (while there should only be one concise set of rules of the language, of course). The worse thing is, there is no way to refine programers (as conformance to compilers) being away from TIMTOWTDI. So in this case, change of rules can only reflect some of the existed practice, thus the result may be less idiomatic than the status quo, which largely defeats the original purpose.
 
-> Rather, the driver seat should be given to idioms. 
+> Rather, the driver seat should be given to idioms.
 
 Which idioms?
 
@@ -117,9 +117,9 @@ Which idioms?
 This can hardly be simple in C++. The proposed changes of rules also shows it.
 
 > In summary, the following expressions are evaluated in the order `a`, then `b`, then `c`, then `d`:
-
+>
 >	1.	`a.b`
->	2. 	`a->b`
+>	2.	`a->b`
 >	3.	`a->*b`
 >	4.	`a(b1, b2, b3)`
 >	5.	`b @= a`
@@ -147,7 +147,7 @@ It seems that "the value computation and the associates side effects of E1 are s
 
 How do the optimizer take the advantage of stricter limitation on imlementation?
 
-> Based on these experiments, we feel confident recommending the left-to-right evaluation rules for syntactic function calls and in the functional cast notation involving more than  one arguments in the argument list. 
+> Based on these experiments, we feel confident recommending the left-to-right evaluation rules for syntactic function calls and in the functional cast notation involving more than  one arguments in the argument list.
 
 This chapter is mostly about experience on specific implementation, concerned with some QoI issues. These experiments do not provide some further information to answer:
 
@@ -159,8 +159,7 @@ Note that an implementation may even need to modify nothing to be conforming.
 
 ## 8. Alternate Evaluation Order for Function Calls
 
-> We do not believe that such a non determinism brings any substantial added optimization 
-benefit, but it does perpetuate the confusion and hazards around order of evaluations in function calls.
+> We do not believe that such a non determinism brings any substantial added optimization benefit, but it does perpetuate the confusion and hazards around order of evaluations in function calls.
 
 Please prove your belief.
 

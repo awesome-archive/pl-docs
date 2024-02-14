@@ -1,13 +1,12 @@
 ﻿# [科普]变量、全局变量及其它
 
-对最近各种蛋疼的所谓“全局”“变量”问题的解释做个小结。
+　　本文试图对各种蛋疼的所谓“全局”“变量”问题的解释做个小结。
 
-
-## 1 变量(variable) 的一般含义
+# 变量(variable) 的一般含义
 
 　　“变量”来源于代数学，是数学中最伟大的发明之一。变量是表示可变数学对象的符号(symbol) 。它具有两重含义，一是指在某个上下文中的符号本身；二是这个符号表示的可变的值(value) 。
 
-## 2 程序设计语言中的变量、变量名(variable name) 和作用域(scope)
+# 程序设计语言中的变量、变量名(variable name) 和作用域(scope)
 
 　　在程序设计语言中也有类似的概念。不同的是，一般需要更加明确地指出一个变量有效的上下文。这个上下文通常是代码中的一段（连续的）区域(region) ，称为作用域(scope) 。只有在作用域中使用的变量是有效的。
 
@@ -17,45 +16,44 @@
 
 　　另外，在明确了名称的概念之后，作用域也不只限于变量，对于任何其它具有名称的抽象也适用。作用域能避免相同的名称的冲突，也就是说允许相同的名称在不同的上下文中指称(denotes) 不同的内容。
 
-　　对 ISO/IEC JTC1/SC22 标准化的语言，通常会把 ISO/IEC 2382 作为正式引用(normative reference) 。这是术语定义的集合，其中就有“变量”(variable) 。 [ISO/IEC 2382:2015](https://www.iso.org/obp/ui/#iso:std:iso-iec:2382:ed-1:v1:en) 给出的 variable 的一般定义如下：
+　　对 ISO/IEC JTC1/SC22 标准化的语言，通常会把 ISO/IEC 2382 作为正式引用(normative reference) 。这是术语定义的集合，其中就有“变量”。[ISO/IEC 2382:2015](https://www.iso.org/obp/ui/#iso:std:iso-iec:2382:ed-1:v1:en) 给出的 variable 的一般定义如下：
 
-> **variable**
-
+> **variable**\
 > quadruple, established by a declaration or an implicit declaration, that consists of an identifier, a set of data attributes, one or more addresses, and data values, where the relationship between the addresses and the data values may vary
 
 其中引用的其它相关术语的定义如下：
 
-> **address**
-
-> value that identifies a location
-
-> **declaration**
-
-> explicit language construct that introduces one or more identifiers into a program and specifies how these identifiers are to be interpreted
-
-> **implicit declaration**
-
+> **address**\
+> value that identifies a location\
+> **declaration**\
+> explicit language construct that introduces one or more identifiers into a program and specifies how these identifiers are to be interpreted\
+> **implicit declaration**\
 > declaration caused by the occurrence of an identifier that designates an object, whose characteristics are determined by default
 
 可见和上面的一般说法是基本一致的。
 
-## 3 限定名称(qualified name)
+# 限定名称(qualified name)
 
 　　上面提到过使用作用域的一个原因是防止相同名称的冲突。有时作用域限制不太方便，因为需要在整个程序范围内访问的名称都得放在全局作用域中。所以还需要其它的机制。
 
 　　许多语言提供了全局名称的额外组织机制，一个比较通用的手段是允许对标识符增加表示作用域子集的前缀构成限定名称。限定名称更加明确，而对应未被限定的名称则可以适合更多作用域。
 
-　　这种机制可以有不同的表现形式，如C++和C#的命名空间(namespace) ，Ada 和 Java 的包(pakage) 等（ Java 首先把变量放在类中，然后以类作为包的成员）。
+　　这种机制可以有不同的表现形式，如 C++ 和 C# 的命名空间(namespace) ，Ada 和 Java 的包(pakage) 等（Java 首先把变量放在类中，然后以类作为包的成员）。
 
-## 4 C 语言的变量
+# C 语言的变量
 
-　　应该指出， K&R 提到了变量，而 ISO C 中没有正式定义这个概念，甚至 ISO C 正式文本中用到的 variable 一词也都不是变量的意思，而是如 variable length array 等。
+　　应该指出，K&R C 提到了 variable ，而 ISO C 中没有正式定义这个概念，甚至 ISO C 正式文本（直到 ISO C17）中正式(normative) 用到的 variable 一词也都不是变量的意思，而是如 variable length array 等。
 
 　　这里的变量可以按传统意义理解，即包括变量名在内，但对于 C 这样的明确支持不同作用域的语言来说，在整个程序范围内变量的同一性(identity) 就成了问题——“变量名一致的变量就是同一个变量”有违整体上的直觉。而要是撇开造成问题的变量名，即专指变量内容，在 C 语言中使用表示存储的对象(object) 就能很好地解释清楚了，没必要用“变量”这个词来增加理解上的困难。不知是不是这个原因，ISO C 才没定义变量的概念。
 
 　　也就是说，对变量的概念存在两种理解，不见得哪种就是对的，而且都没有必要。这种二义性已经使得一些基本问题的讨论变得没有意义，如“变量是不是表达式”。由于讨论语言问题时“变量”可以被更清晰的术语取代，因此，可以回避这个模糊的说法。
 
-## 5 C++ 语言的变量
+　　除了说明性(informative) 的（如出现在 NOTE 和脚注中的）用法，自 ISO/IEC 9899:2017 引入的 名词 variable 的其它用法包括：
+
+* 条件变量([condition variable](https://zh.wikipedia.org/zh-cn/%E7%9B%A3%E8%A6%96%E5%99%A8_%28%E7%A8%8B%E5%BA%8F%E5%90%8C%E6%AD%A5%E5%8C%96%29#%E6%A2%9D%E4%BB%B6%E8%AE%8A%E6%95%B8%28Condition_Variable%29)) ，和这里的所谓变量是两回事。
+* 7.17.2.1 `ATOMIC_VAR_INIT` 宏中出现的应为 object 的 variable（可以看到这个概念在 C++ 中明确有定义），这里明显是抄错了 ISO C++11 里的文本漏了替换。（说起来这个都已经[被提案在 ISO C++20 中废弃了](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p1138r0.pdf)，还有 [C 的问题的一份功劳](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2257.htm#dr_485)……）
+
+# C++ 语言的变量
 
 　　C++ 中的变量通过对象或不是作为类的非静态成员的引用的声明引入。变量名指称被声明的引用或对象：
 
@@ -65,7 +63,7 @@
 
 　　由于引用的存在，这里变量的概念并没有被对象等直接取代。
 
-## 6 全局(global)
+# 全局(global)
 
 　　全局是指整个程序的范围。例如，对于运行时来说，全局状态是程序的各个部分都能访问的状态。
 
@@ -73,16 +71,15 @@
 
 　　与全局对立的是局部(local) 。与全局变量对立的是局部变量(local variable) 。但是，C/C++程序中，局部变量往往指块作用域(block scope) 中的变量，并不严格对立。因此下文不使用这些概念。
 
-## 7 C 语言的作用域和名称空间
+# C 语言的作用域和名称空间
 
 　　C语言有且仅有函数作用域(function scope) 、文件作用域(file scope) 、块作用域和函数原型作用域(function prototype scope) 这些作用域：
 
 ISO C11(N1570)
 
-> ## 6.2.1 Scopes of identifiers
-
-> 3 A label name is the only kind of identifier that has function scope. It can be used (in a goto statement) anywhere in the function in which it appears, and is declared implicitly by its syntactic appearance (followed by a : and a statement).
-
+> # 6.2.1 Scopes of identifiers
+>
+> 3 A label name is the only kind of identifier that has function scope. It can be used (in a goto statement) anywhere in the function in which it appears, and is declared implicitly by its syntactic appearance (followed by a : and a statement).\
 > 4 Every other identifier has scope determined by the placement of its declaration (in a declarator or type specifier). If the declarator or type specifier that declares the identifier appears outside of any block or list of parameters, the identifier has file scope, which terminates at the end of the translation unit. If the declarator or type specifier that declares the identifier appears inside a block or within the list of parameter declarations in a function definition, the identifier has block scope, which terminates at the end of the associated block. If the declarator or type specifier that declares the identifier appears within the list of parameter declarations in a function prototype (not part of a function definition), the identifier has function prototype scope, which terminates at the end of the function declarator. If an identifier designates two different entities in the same name space, the scopes might overlap. If so, the scope of one entity (the inner scope) will end strictly before the scope of the other entity (the outer scope). Within the inner scope, the identifier designates the entity declared in the inner scope; the entity declared in the outer scope is hidden (and not visible) within the inner scope.
 
 　　顺带纠正两点常见误区：
@@ -94,34 +91,30 @@ ISO C11(N1570)
 
 **ISO C11(N1570)**
 
-> ## 6.2.3 Name spaces of identifiers
-
-> 1 If more than one declaration of a particular identifier is visible at any point in a translation unit, the syntactic context disambiguates uses that refer to different entities. Thus, there are separate name spaces for various categories of identifiers, as follows:
-
-> — label names (disambiguated by the syntax of the label declaration and use);
-
-> — the tags of structures, unions, and enumerations (disambiguated by following any32) of the keywords struct, union, or enum);
-
-> — the members of structures or unions; each structure or union has a separate name space for its members (disambiguated by the type of the expression used to access the member via the . or -> operator);
-
-> — all other identifiers, called ordinary identifiers (declared in ordinary declarators or as enumeration constants).
-
+> # 6.2.3 Name spaces of identifiers
+>
+> 1 If more than one declaration of a particular identifier is visible at any point in a translation unit, the syntactic context disambiguates uses that refer to different entities. Thus, there are separate name spaces for various categories of identifiers, as follows:\
+> — label names (disambiguated by the syntax of the label declaration and use);\
+> — the tags of structures, unions, and enumerations (disambiguated by following any32) of the keywords struct, union, or enum);\
+> — the members of structures or unions; each structure or union has a separate name space for its members (disambiguated by the type of the expression used to access the member via the . or -> operator);\
+> — all other identifiers, called ordinary identifiers (declared in ordinary declarators or as enumeration constants).\
 > 32) There is only one name space for tags even though three are possible.
 
 　　C语言没有限定名称，所有的名称都是标识符。ISO C也没有直接说明“名称”的含义，但这里应该是清楚的。（实际上，C语言语法中的identifier在其前身B语言中的对应物就叫 name 。）
 
-## 8 C++ 语言的作用域：
+# C++ 语言的作用域
+
 　　C++的作用域比较多，以下以标准文本的标题排列：
 
 **ISO C++11**
 
-* 3.3.3 Block scope [basic.scope.local]
-* 3.3.4 Function prototype scope [basic.scope.proto]
-* 3.3.5 Function scope [basic.funscope]
-* 3.3.6 Namespace scope [basic.scope.namespace]
-* 3.3.7 Class scope [basic.scope.class]
-* 3.3.8 Enumeration scope [basic.scope.enum]
-* 3.3.9 Template parameter scope [basic.scope.temp]
+> 3.3.3 Block scope [basic.scope.local]\
+> 3.3.4 Function prototype scope [basic.scope.proto]\
+> 3.3.5 Function scope [basic.funscope]\
+> 3.3.6 Namespace scope [basic.scope.namespace]\
+> 3.3.7 Class scope [basic.scope.class]\
+> 3.3.8 Enumeration scope [basic.scope.enum]\
+> 3.3.9 Template parameter scope [basic.scope.temp]
 
 　　注意到块作用域一节的交叉引用(cross reference) 的标签(label) 中说的是“local”。这是因为 C++98/03 中用词比较混乱，有时候作 block scope 有时候作 local scope（局部作用域），到 C++11 按 ISO C 统一了，但交叉引用在没有整节作废时还是需要保持兼容性，所以没变。
 
@@ -141,7 +134,7 @@ ISO C11(N1570)
 
 　　（为什么 C 没有真正的“全局”而 C++ 可以有了呢——并不是这个单独决定的。）
 
-## 9.C/C++程序与链接(linkage)
+# C/C++ 程序与链接(linkage)
 
 　　一个C/C++程序由一个或多个翻译单元(translation unit) 组成。翻译单元作为源代码可以各自独立地被翻译为目标代码然后链接(linking) 成完整的程序。语法上，（预处理后的、正确的）翻译单元由名称的声明(declaration) 构成。声明引入标识符/名称并确定它们的指称。某个翻译单元中的声明仅在这个翻译单元内有效。合法的程序中使用任意名称之前都需要这个名称在所在翻译单元内（而不是“全局”）的（用户提供的，或者实现预定义的）声明。
 
@@ -151,17 +144,21 @@ ISO C11(N1570)
 
 　　很自然地，能以相同名称共享外部实体的名称具有外部链接(external linkage) ，只在翻译单元内部共享指称实体的具有内部链接(interal linkage) ，不共享指称的无链接(no linkeage) 。
 
-　　所谓外部变量(external variable) 就是指变量名具有外部链接的变量。这和作用域没有直接的关系。但由于对象声明默认具有的链接，容易造成混淆。这里仅举两例，不详细展开： a) `extern` 的确切含义； b)`const`对象在 C 和 C++ 中具有不同的链接。
+　　所谓外部变量(external variable) 就是指变量名具有外部链接的变量。这和作用域没有直接的关系。但由于对象声明默认具有的链接，容易造成混淆。这里仅举两例，不详细展开：a) `extern` 的确切含义； b)`const`对象在 C 和 C++ 中具有不同的链接。
 
 　　这样，可以确定，外部变量和“全局变量”不是一回事。这方面的误解看来还是不少，不知道拜谁所赐了。
 
-## 10 结论：C/C++ 中“全局变量”的确切含义
+# 结论：C/C++ 中“全局变量”的确切含义
 
 　　可见，无论是“全局”还是“变量”，在 C 和 C++ 之间都有一些差距。
 
-　　所谓“全局”，无论在 C/C++ 中，都没有传统的意义。 C 能实现在效果上和“全局变量”类似的只是名称具有外部链接的对象，但硬说“全局”就名不副实了。 C++ 多了全局命名空间这种在源码层次上强制的约定，但要真正能保证实现“全局”，还是得靠链接。
+　　所谓“全局”，无论在 C/C++ 中，都没有传统的意义。C 能实现在效果上和“全局变量”类似的只是名称具有外部链接的对象，但硬说“全局”就名不副实了。C++ 多了全局命名空间这种在源码层次上强制的约定，但要真正能保证实现“全局”，还是得靠链接。
 
 　　C 语言中讨论“全局变量”可以有各种没明确的意义，所以这个混乱的概念还是不用为妙。只有C++中是可以明确的：指全局命名空间作用域中的变量。“文件作用域对象”才是C语言中对应的比较明确的提法。
 
 　　C 的这种混乱的根源除了 ISO C 没有明确一些和传统认知有微妙差异的关键概念外，主要是由于缺乏对通过链接共享实体指称的多翻译单元的语言设计的理解所致。不过说到底，既然是坑，没能力填上就绕过去吧。
+
+# 补充观点
+
+　　关于更一般问题的来源的讨论，可以参照[这里](authority-and-confusion.md)。
 
